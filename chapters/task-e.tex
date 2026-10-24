@@ -1,0 +1,663 @@
+\section{Business Rules and Constraints}
+\label{sec:rules}
+
+A business rule or a constraint is a condition that every function of the system must obey.
+It is not itself a feature, and it is therefore kept separate from the functional requirements.
+The rules below are limited to employee access and attendance.
+Visitor management and payroll calculation are outside the scope of this phase: the system exports attendance facts, including worked hours and overtime duration, and does not compute pay.
+
+Numbers that appear in the assignment are used as stated: two factories, Binh Duong with about 800 employees and Long An with about 600; a peak of about 800 access transactions in 30 minutes at one factory; a kiosk response of at most 2 seconds; and attendance data available for reconciliation before 12:00 on the first day of each month.
+Where a figure is not in the assignment, the row cites the non-functional requirement that introduces it.
+
+\subsection{Business rules}
+
+\begin{longtable}{@{}L{1.25cm}L{5.15cm}L{4.05cm}L{4.15cm}@{}}
+\caption{Business rules.}
+\label{tab:br}\\
+\toprule
+\textbf{ID} & \textbf{Rule} & \textbf{Source} & \textbf{Effect on the architecture}\\
+\midrule
+\endfirsthead
+\toprule
+\textbf{ID} & \textbf{Rule} & \textbf{Source} & \textbf{Effect on the architecture}\\
+\midrule
+\endhead
+BR-01 &
+An employee has one active QR credential.
+Issuing a new credential revokes the previous one.
+A revoked or expired credential is rejected at every gate.
+Termination revokes the credential automatically. &
+FR-1.3, FR-1.6, FR-1.7 &
+Credential state (active, revoked, expired) has a single owner.
+Every gate validates against the latest state it has received.\\
+\addlinespace
+BR-02 &
+A credential is revoked when the employee leaves, the phone is lost, or misuse is suspected.
+While a gate is online, its revocation list is refreshed at least every minute.
+A gate that was offline applies the revocation when it reconnects. &
+FR-1.6 &
+Revocations are pushed on change and pulled on a short interval, including after a reconnect.\\
+\addlinespace
+BR-03 &
+The gate opens only when the QR is authentic, unexpired, and not revoked, the employee is active, and an access right allows this factory, this gate, and this time window.
+Otherwise the gate stays closed.
+Every attempt is stored as an access event.
+Only a granted entry or exit becomes an attendance transaction. &
+FR-1.8, FR-2.2, FR-2.3, FR-3.1, FR-3.2 &
+The access decision runs at the gate.
+A denied attempt is an access event and an audit record, not an attendance transaction.\\
+\addlinespace
+BR-04 &
+Each granted entry or exit is one attendance transaction.
+Each scan stores an event identifier, employee identifier, gate, factory, direction, device time, server receive time, result, and a denial reason when access is denied. &
+Assignment brief; FR-3.1, FR-3.2; NFR-06 &
+The attendance record is written durably at the gate before the kiosk responds.\\
+\addlinespace
+BR-05 &
+Direction belongs to the scanner, not to the employee.
+A gate is configured as entry, exit, or bidirectional.
+A bidirectional gate has one direction on each scanner. &
+FR-2.1 &
+Gate configuration, including factory and direction, is stored centrally and synchronised to the edge.\\
+\addlinespace
+BR-06 &
+Scans of the same person at the same gate within 60 seconds count as one event.
+Each event has an identifier formed from the gate identifier and a UUID, so a retry does not create a second record.
+A second entry is rejected when there has been no exit since the previous entry.
+An appearance at both factories inside an impossible travel time is flagged. &
+NFR-05, FR-2.5, FR-3.3, NFR-15 &
+Ingestion is idempotent, because a gate may upload the same event more than once.
+Anti-passback state is held at the edge.\\
+\addlinespace
+BR-07 &
+An attendance record is not edited or deleted after capture.
+A correction is a separate adjustment that records the reason, the requester, the approver, and the time.
+Human resources may adjust any employee.
+A supervisor may adjust only their own team.
+The original record is kept. &
+FR-3.7, NFR-07 &
+The event store is append-only.
+Adjustments live in a separate table, so a later reconciliation can show both the scan and the change.\\
+\addlinespace
+BR-08 &
+For export to human resources, day \(D\) runs from 00:00 to 23:59 in Asia/Ho\_Chi\_Minh.
+Each event stores the device time and the time the central system received it.
+Edge clocks are synchronised by NTP, with skew of at most one second. &
+Integration timing in Section~\ref{sec:style}; NFR-06 &
+Every edge node runs NTP.
+A shift that crosses midnight is not yet assigned to a calendar day; see the assumptions below.\\
+\addlinespace
+BR-09 &
+Attendance for day \(D\) is sent as one batch at 00:00 on day \(D{+}1\), with status pending, success, or failed.
+The batch contains the events received by the cutoff.
+Events that arrive later, from a gate that was offline, go into a correction batch.
+They are flagged and do not silently replace a closed batch. &
+NFR-10, NFR-24, FR-4.4 &
+Scheduling and status tracking sit off the gate path.
+The daily batch does not wait for a station that may remain offline for the buffer in TC-07.\\
+\addlinespace
+BR-10 &
+The full data set for the previous month is available for reconciliation before 12:00 on the first day of the next month.
+Failed or missing daily batches are retried before that deadline.
+The internal target is 06:00 on the first, which leaves six hours of margin. &
+Assignment brief; C-03; NFR-24; FR-4.3, FR-4.4 &
+Retry, a completeness check, and an alert are batch work.
+They are not on the path that opens the gate.\\
+\addlinespace
+BR-11 &
+The system exports attendance data and may compute attendance facts such as hours worked, lateness, early leave, absence, and overtime duration.
+It does not compute salary, overtime pay, or deductions. &
+Assignment brief; C-05; FR-3.5 &
+There is no payroll module.
+The human-resources adapter only maps attendance data to the external API.\\
+\addlinespace
+BR-12 &
+This phase handles employees only.
+Visitors do not receive credentials from this system. &
+Assignment brief; C-05 &
+There is no visitor module.
+The credential model can still accept one in a later phase.\\
+\addlinespace
+BR-13 &
+An employee has one home factory.
+Use of a gate, including a gate at the other factory, is allowed only when an access right names that factory, that gate, and that time window.
+The event records the factory where the scan happened. &
+FR-1.1, FR-1.8 &
+Each edge cache holds the credentials and rights for that plant.
+At about 1{,}400 employees, caching every active credential is acceptable.
+Cross-plant access is not the default.\\
+\addlinespace
+BR-14 &
+When an employee cannot show a QR, a guard may record a manual entry or exit after checking the employee identifier and photograph.
+The event is marked manual and stores the guard, the reason, and the employee.
+It is audited.
+A later confirmation by human resources is not required. &
+FR-2.7, NFR-31 &
+The guard function runs on the gate station and writes the same kind of event as a scan.\\
+\addlinespace
+BR-15 &
+Employees see only their own records.
+Supervisors see their own team.
+Human resources sees every employee.
+Executives see aggregate reports.
+Visibility may also be limited by factory. &
+FR-5.3, NFR-14 &
+Authorisation checks the data scope, not only the name of the function.
+The check is enforced in the central application.\\
+\addlinespace
+BR-16 &
+On a fire alarm or an authorised command, every turnstile of that factory switches to free exit within five seconds.
+The resulting events are marked as an emergency.
+Safety then overrides access control. &
+NFR-30, FR-2.9 &
+Free exit is decided at the edge, so it does not wait for the wide-area network or the central application.\\
+\bottomrule
+\end{longtable}
+
+\subsection{Technical and integration constraints}
+
+\begin{longtable}{@{}L{1.25cm}L{5.15cm}L{4.05cm}L{4.15cm}@{}}
+\caption{Technical and integration constraints.}
+\label{tab:tc}\\
+\toprule
+\textbf{ID} & \textbf{Constraint} & \textbf{Source} & \textbf{Effect on the architecture}\\
+\midrule
+\endfirsthead
+\toprule
+\textbf{ID} & \textbf{Constraint} & \textbf{Source} & \textbf{Effect on the architecture}\\
+\midrule
+\endhead
+TC-01 &
+Attendance data is sent to the existing human-resources system through its API.
+That system is not replaced or modified.
+The API is called from the central site. &
+Assignment brief; C-01; NFR-23 &
+One adapter hides the protocol, the payload, and authentication.
+Delivery is the batch in BR-09.\\
+\addlinespace
+TC-02 &
+The gate is opened and closed through the existing turnstile API, once per access event.
+The call times out within one second, is retried at most once, and carries an idempotent command identifier.
+On failure the kiosk tells the employee to contact the guard, and the incident is logged. &
+Assignment brief; C-02; NFR-25 &
+The turnstile adapter runs on the gate station, on the plant network, inside the two-second budget.
+It does not cross the wide-area network.\\
+\addlinespace
+TC-03 &
+The kiosk responds within two seconds at the stated peak of about 800 transactions in 30 minutes at one factory. &
+Assignment brief; NFR-01; C-08 &
+The average rate in that window is about 0.44 transactions per second.
+The binding limits are latency and availability at the gate, not throughput.
+The scan path does not wait for a remote server or for the human-resources system.\\
+\addlinespace
+TC-04 &
+No accepted attendance record is lost, including while the wide-area link or the central site is unavailable.
+The event is stored on local disk before or together with the turnstile command. &
+Assignment brief; NFR-04; NFR-09 &
+The gate writes first, then forwards the event at least once.
+BR-06 makes a duplicate upload harmless.\\
+\addlinespace
+TC-05 &
+The two factories are in different provinces. &
+Assignment brief; C-06 &
+Any central component is reached over a wide-area link.
+Each factory has its own edge node, and factory is part of the data model.\\
+\addlinespace
+TC-06 &
+The employee shows the QR on a personal phone.
+The credential scanned at the gate is a signed token that rotates, in this design at least every 30 seconds, and carries an internal employee identifier, an expiry, and a signature.
+It does not carry the employee's name or identity-card number.
+Email is a way to open the application, not a long-lived image of the code. &
+Assignment brief; C-04; FR-1.4, FR-1.5; NFR-15, NFR-21 &
+The gate checks the signature offline against a cached key.\\
+\addlinespace
+TC-07 &
+The link between a factory and the central site is not fully reliable.
+A gate keeps validating credentials, opening the turnstile, and recording events without that link, and it buffers events for at least 72 hours. &
+C-11; NFR-09 &
+This is the reason the access decision and the event store sit at the edge.\\
+\addlinespace
+TC-08 &
+Timestamps from the two factories must be comparable.
+Edge clocks stay within one second of each other.
+Each event stores device time and server receive time. &
+NFR-06 &
+NTP runs on every edge node.\\
+\addlinespace
+TC-09 &
+The design follows the SOLID principles. &
+Assignment objective &
+Domain modules depend on interfaces.
+Adapters implement those interfaces, so an external system can be replaced without changing the domain code.\\
+\addlinespace
+TC-10 &
+The implementation milestone must be testable without the real human-resources system and without the real turnstile.
+Both are replaceable by simulators behind the same interface. &
+Project milestone; testability characteristic &
+The selected style can be run locally: one central application, one database, mock adapters, and a scanner simulator.\\
+\addlinespace
+TC-11 &
+Further requirements may be added in later phases. &
+Assignment brief; C-10 &
+New scope is added as a module behind an existing interface.
+The gate path is not rewritten.\\
+\bottomrule
+\end{longtable}
+
+\subsection{Organisational and regulatory constraints}
+
+\begin{longtable}{@{}L{1.25cm}L{5.15cm}L{4.05cm}L{4.15cm}@{}}
+\caption{Organisational and regulatory constraints.}
+\label{tab:oc}\\
+\toprule
+\textbf{ID} & \textbf{Constraint} & \textbf{Source} & \textbf{Effect on the architecture}\\
+\midrule
+\endfirsthead
+\toprule
+\textbf{ID} & \textbf{Constraint} & \textbf{Source} & \textbf{Effect on the architecture}\\
+\midrule
+\endhead
+OC-01 &
+Personal data is processed under the Law on Personal Data Protection No.~91/2025/QH15 and Decree 356/2025/ND-CP, both in force since 1 January 2026.
+Decree 356 replaced Decree 13/2023/ND-CP. &
+Assignment brief; NFR-20; C-07 &
+The design minimises data, encrypts it in transit and at rest, limits access by role, and can answer a request by an employee to see their own data.
+Edge nodes store as little personal data as possible.\\
+\addlinespace
+OC-02 &
+Functions are protected by role-based access control for employees, production supervisors, human resources, guards, administrators, and executive management.
+Checks are enforced on the server and deny access by default.
+A supervisor sees only their own team. &
+Assignment brief; NFR-14; FR-5.3 &
+Identity and authorisation are central.
+A gate station needs only the guard role locally.\\
+\addlinespace
+OC-03 &
+Security-relevant actions are written to an audit log: sign-in, changes to roles, creation and revocation of credentials, changes to gate configuration, manual overrides, attendance adjustments, report exports, access to personal data, and synchronisation with human resources.
+The log is append-only. &
+Assignment brief; NFR-18, NFR-19; FR-4.9 &
+Every module writes audit records through one interface.
+The audit store is separate from the business tables.\\
+\addlinespace
+OC-04 &
+Administrators manage accounts, roles, gates, and integration endpoints.
+They do not create attendance adjustments.
+Adjustments are created by human resources, or by a supervisor for their own team. &
+FR-3.7, FR-5.3; BR-07 &
+Technical administration and changes to attendance data are different permissions.\\
+\addlinespace
+OC-05 &
+Attendance data is kept for at least five years and is then deleted or anonymised.
+The audit log is kept online for at least twelve months and is then archived.
+Both periods remain subject to confirmation by the company's legal and human-resources functions. &
+NFR-19, NFR-22; Law on Accounting No.~88/2015/QH13, Art.~41; Decree 174/2016/ND-CP &
+Retention is a scheduled job.
+The volume is small, on the order of a few gigabytes a year, and does not drive the choice of style.\\
+\addlinespace
+OC-06 &
+Personal data and attendance data are hosted in Vietnam, on company servers or in a Vietnam region of a cloud service. &
+Assumption, recorded so that the deployment view does not assume a cross-border transfer. &
+This constrains where the central application is hosted.\\
+\addlinespace
+OC-07 &
+Visitor management and payroll calculation are outside this phase. &
+Assignment brief; C-05; BR-11, BR-12 &
+The module list has no visitor module and no payroll module.\\
+\addlinespace
+OC-08 &
+The work is an academic project with a design milestone and an implementation milestone, documented in several architectural views, and carried out by a small team. &
+Assignment brief; C-10 &
+The number of deployable units is kept small.
+This constraint decides between the two leading styles in Section~\ref{sec:style}.\\
+\bottomrule
+\end{longtable}
+
+\subsection{Assumptions}
+\label{sec:assumptions}
+
+Five points are not stated in the assignment and are not yet fixed elsewhere in the report.
+They are used as follows, and a change to any of them affects the rule cited beside it.
+
+\begin{enumerate}
+  \item A shift that crosses midnight is not yet mapped onto calendar day \(D\).
+  The export boundary is midnight (BR-08), while daily attendance is also computed from the assigned shift.
+  \item On a bidirectional gate, each scanner has its own direction (BR-05).
+  \item While a credential is being reissued, the previous credential and the new one do not both remain valid (BR-01).
+  \item Email does not attach a static QR image.
+  It is a means of opening the application that displays the rotating token (TC-06).
+  \item The central store is located in Vietnam (OC-06).
+\end{enumerate}
+
+\noindent
+The timed values taken from the non-functional requirements, and used without reopening them here, are a duplicate-scan window of 60 seconds, QR rotation of at most 30 seconds, a revocation refresh of one minute, guard-assisted entry when the cached revocation list is older than 24 hours, an offline event buffer of at least 72 hours, attendance retention of at least five years, and an internal export target of 06:00 on the first of the month.
+Exit remains allowed when the revocation cache is stale.
+
+\section{Architecture Style Analysis and Selection}
+\label{sec:style}
+
+The style is chosen against the driving characteristics already established for this system.
+The three that decide the structure are integrity of the attendance record, availability of the gate when the network fails, and a response within two seconds.
+Security, privacy, and auditability are required throughout and are not traded away.
+Interoperability with the two existing systems is also driving.
+Simplicity is the tie-breaker, because the team must implement and test the design in the next milestone.
+Scalability beyond the stated load, and independent deployment of many central services, are secondary.
+
+Table~\ref{tab:weights} names the columns used in the comparison.
+The weight of a driving or non-negotiable characteristic is 3.
+The weight of a supporting characteristic, including simplicity, is 2.
+The weight of a secondary characteristic is 1.
+The weights sum to 23, so the highest possible score is 115.
+Observability, safety, usability, and configurability are satisfied inside the chosen structure.
+They do not have their own column.
+Safety is still a rule the structure must allow: emergency free exit at the edge (BR-16).
+
+\begin{table}[ht]
+\centering
+\caption{Characteristics used to compare styles.}
+\label{tab:weights}
+\small
+\begin{tabularx}{\textwidth}{@{}lXrl@{}}
+\toprule
+\textbf{Column} & \textbf{Characteristic} & \textbf{Weight} & \textbf{Grounds}\\
+\midrule
+Perf & Response time at the gate & 3 & NFR-01--03, C-08, TC-03\\
+Avail & Availability and fault tolerance of the gate & 3 & NFR-08--11, C-06, C-11, TC-07\\
+Data & Integrity of the attendance record & 3 & NFR-04--07, TC-04, BR-06, BR-09\\
+Sec & Security, privacy, and auditability & 3 & NFR-13--22, OC-01--04\\
+Interop & Interoperability with the two external systems & 3 & NFR-23--25, C-01--03\\
+Maint & Maintainability and extensibility & 2 & NFR-27, TC-09, TC-11\\
+Simple & Feasibility for a small team & 2 & C-10, OC-08, TC-10\\
+Test & Testability without the real external systems & 2 & TC-10\\
+Scale & Growth within a small, predictable load & 1 & NFR-26, TC-03\\
+Deploy & Updating many edge nodes & 1 & NFR-32\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Candidates}
+
+Six styles are compared.
+The edge placement is a distribution decision rather than a complete style: it fixes what runs at the gate, and the central part still needs one of the other styles.
+Two hybrids are therefore scored separately.
+Four further styles from the standard catalogue are left out of the table.
+A pipeline does not fit a decision that must finish in two seconds.
+A space-based style targets large and unpredictable bursts, and elasticity is not required at this load.
+An orchestration-driven service architecture adds a hub that the load does not need.
+A microkernel is a useful way to attach adapters, and dependency inversion already provides that inside the selected style.
+It is not a style for the whole system.
+
+\begin{longtable}{@{}L{2.35cm}L{4.15cm}L{4.05cm}L{4.15cm}@{}}
+\caption{Styles considered for TMC.}
+\label{tab:styles}\\
+\toprule
+\textbf{Style} & \textbf{What it would mean here} & \textbf{Advantage} & \textbf{Cost}\\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Style} & \textbf{What it would mean here} & \textbf{Advantage} & \textbf{Cost}\\
+\midrule
+\endhead
+Layered monolith &
+One application in technical layers.
+Every scan calls the central server. &
+One deployment and one database.
+Transactions are simple. &
+Every scan crosses the wide-area network.
+A network or server failure stops both factories.\\
+\addlinespace
+Modular monolith &
+One application, divided into domain modules with explicit interfaces: identity and credentials, gates, attendance, reporting and audit, administration, and integration. &
+One codebase and one database.
+The modules match the functional groups.
+Adapters sit behind interfaces. &
+Used alone, the gate still depends on the central server.
+Modules must not read each other's tables.\\
+\addlinespace
+Microservices &
+Many independently deployed services, each with its own database. &
+A failure in one service need not stop the others.
+Parts can be deployed separately. &
+The load is about one transaction per second.
+Distributed data makes a guarantee of no lost record harder.
+The operational cost is high for the implementation milestone.
+Used alone, the gate still depends on the network.\\
+\addlinespace
+Event-driven &
+Components publish and consume events through a broker, and the broker is the main style rather than an element of another style. &
+A durable queue fits forwarding, revocation, the daily batch, and audit. &
+The gate decision is a request that must finish in two seconds.
+A broker on that path adds latency and another component to operate.\\
+\addlinespace
+Service-based &
+A few coarse services, deployed separately, often sharing one database.
+Typical split: access and attendance, identity, reporting, and integration. &
+A slow report or a slow export need not stop the service that records attendance.
+Fewer parts than microservices. &
+Several deployable units and calls between them.
+Used alone, the gate still depends on the network.\\
+\addlinespace
+Edge and a central backend &
+Each factory validates the QR, calls the turnstile, and stores the event locally, then synchronises with a central backend. &
+The two-second limit does not depend on the wide-area network.
+Gates keep working during an outage.
+A local write covers the no-loss rule. &
+Credentials and events are eventually consistent.
+The edge devices must be deployed, updated, and protected.
+This row does not yet choose the central style.\\
+\bottomrule
+\end{longtable}
+
+\subsection{Comparison}
+
+A score of 1 means poor support for this system, and a score of 5 means strong support.
+A style scored on its own is scored without the edge, so every central-only style is weak on availability of the gate.
+Hybrid H1 places the gate stations at the edge, implements the centre as a modular monolith, and moves synchronisation and the human-resources export onto an asynchronous path.
+An outbox table is sufficient for that path.
+A message broker can be added later behind the same interface.
+Hybrid H2 uses the same edge and the same asynchronous path, and implements the centre as a small set of separately deployed services.
+
+On availability, microservices and the service-based style score 2, and the layered monolith scores 1.
+A failed reporting service need not stop a separate access service, which is the extra point.
+Neither scores higher than 2, because the scan would still cross the wide-area network.
+Isolating a back-office service is not the same thing as a gate that works while that network is down.
+
+\begin{table}[ht]
+\centering
+\caption{Weighted comparison. The maximum total is 115.}
+\label{tab:scores}
+\scriptsize
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{@{}lccccccccccr@{}}
+\toprule
+\textbf{Style} & \textbf{Perf} & \textbf{Avail} & \textbf{Data} & \textbf{Sec} & \textbf{Int.} & \textbf{Maint} & \textbf{Simp.} & \textbf{Test} & \textbf{Scale} & \textbf{Dep.} & \textbf{Total}\\
+\midrule
+Layered monolith & 3 & 1 & 2 & 3 & 3 & 2 & 5 & 3 & 2 & 2 & 60\\
+Modular monolith & 3 & 1 & 3 & 4 & 4 & 4 & 4 & 4 & 3 & 3 & 75\\
+Microservices & 3 & 2 & 3 & 3 & 4 & 4 & 1 & 2 & 5 & 5 & 69\\
+Event-driven & 2 & 2 & 4 & 3 & 4 & 3 & 2 & 2 & 5 & 4 & 68\\
+Service-based & 3 & 2 & 3 & 4 & 4 & 4 & 3 & 3 & 4 & 4 & 76\\
+Edge and central & 5 & 5 & 4 & 3 & 4 & 3 & 3 & 3 & 4 & 2 & 87\\
+H1: edge, modular monolith, async & 5 & 5 & 5 & 4 & 4 & 4 & 3 & 4 & 3 & 3 & 97\\
+H2: edge, service-based, async & 5 & 5 & 5 & 4 & 4 & 4 & 2 & 3 & 4 & 4 & 95\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+H1 scores 97 and H2 scores 95.
+They are equal on every column of weight 3.
+H1 is ahead on simplicity and testability.
+H2 is ahead on scalability and deployability, both of weight 1.
+Both hybrids score 4 on interoperability.
+An adapter behind an interface isolates the external API whether that adapter lives in a module or in its own process.
+A separate process buys deployment isolation, which is already counted in the deployability column.
+If that judgement were reversed and H2 were given 5 for interoperability, H2 would score 100 and would rank first.
+This report does not use that reading: speaking the external API correctly is the job of the adapter, which both hybrids have.
+
+\subsection{Selected style}
+
+The selected style is H1.
+Gate stations at each factory decide access and store the event locally.
+One central application, structured as a modular monolith, receives those events and runs reporting, administration, and the export.
+Synchronisation and the export are asynchronous.
+
+This keeps the consequences that the driving characteristics force: the decision runs at the edge, work that is not on the scan path is asynchronous, and each external system sits behind an adapter.
+It does not split the centre into separately deployed services for the implementation milestone.
+The same boundaries exist as modules inside one application.
+The tie-breaker is feasibility for a small team (OC-08).
+H1 has two pieces of software to build and run, the edge agent and the central application, plus one database.
+The integration module or the reporting module can be split out later, which is the move from H1 to H2, without redrawing the boundaries.
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[
+  font=\small,
+  box/.style={draw, rounded corners=2pt, align=center, inner sep=6pt, minimum height=9mm},
+  arr/.style={-{Stealth[length=2mm]}, thick}
+]
+  \node[box] (gate) {Gate station\\at each factory};
+  \node[box, right=14mm of gate] (turn) {Turnstile\\on the plant network};
+  \node[box, below=12mm of gate] (core) {Central modular monolith\\one application, one database};
+  \node[box, right=14mm of core] (hr) {Human-resources\\system};
+
+  \draw[arr] (gate) -- node[above, font=\scriptsize] {open, local} (turn);
+  \draw[arr] (gate) -- node[left, font=\scriptsize, align=center] {events,\\later} (core);
+  \draw[arr] (core) -- node[right, font=\scriptsize, align=center] {revocations\\and config} (gate);
+  \draw[arr] (core) -- node[above, font=\scriptsize] {batch \(D{+}1\)} (hr);
+\end{tikzpicture}
+\caption{The selected style. The scan does not cross the wide-area network. Export and synchronisation do.}
+\label{fig:style}
+\end{figure}
+
+The gate station validates the signed QR against a local cache of credentials, rights, and revocations.
+It applies BR-03, BR-06, and BR-16, calls the turnstile adapter, and writes the event to local durable storage before it responds.
+Manual entry (BR-14) and emergency free exit (BR-16) also run there.
+
+The central application contains six modules: identity and QR credentials; gate-station management; attendance, including ingestion, storage, and adjustments; reporting and audit; administration and access control; and integration, which holds the scheduler and the human-resources adapter.
+Modules call each other through interfaces.
+The database has one schema per module, and a module does not query another module's tables.
+One database is a simplification accepted for this milestone.
+It is not a shared-table design.
+
+From the gate to the centre, events move by store-and-forward, with acknowledgement and the idempotent identifier from BR-06.
+From the centre to the gate, credentials, revocations, and gate configuration are pushed on change and pulled on an interval (BR-02).
+From the centre to human resources, the daily batch and the month-end check run on a schedule (BR-09, BR-10).
+An outbox table meets the no-loss rule.
+A broker remains optional.
+
+\subsubsection{Reasons for the choice}
+
+The two hardest constraints sit at the gate: a response within two seconds (TC-03) and no lost record (TC-04).
+A local decision and a local write remove the wide-area network and the central application from that path.
+
+The factories are in different provinces (TC-05).
+The gates depend on a network the system does not control.
+An edge station keeps each factory operating during an outage and buffers events for at least 72 hours (TC-07).
+
+The load is small and known in advance, so separately deployed central services buy little.
+One codebase, one deployment, and ordinary transactions fit the implementation milestone (OC-08, TC-10).
+
+The modules follow the functional groups and give a place to role-based access control and to the audit log (OC-02, OC-03).
+Adapters behind interfaces satisfy dependency inversion and allow the real external systems to be replaced by mocks (TC-09, TC-10).
+
+Forwarding, revocation, the daily batch, and the month-end retry are asynchronous, so a slow or unavailable human-resources system does not affect a scan (BR-09, BR-10).
+
+\subsubsection{Characteristics supported by the selected style}
+
+\begin{table}[ht]
+\centering
+\caption{Support for the driving and supporting characteristics.}
+\label{tab:support}
+\small
+\begin{tabularx}{\textwidth}{@{}lX@{}}
+\toprule
+\textbf{Characteristic} & \textbf{How the selected style supports it}\\
+\midrule
+Response time &
+Validation and the turnstile call are local.
+The scan path makes no remote call.\\
+\addlinespace
+Availability &
+Each factory continues from its cache while the wide-area link or the central site is down.
+The central application can be restarted without stopping the gates.\\
+\addlinespace
+Integrity &
+The edge writes before it responds, then forwards at least once.
+Ingestion is idempotent.
+A late event becomes a correction batch and is not dropped (BR-09).\\
+\addlinespace
+Security, privacy, audit &
+Role checks and the audit log are central.
+The QR carries no name and no identity-card number.
+The edge does not store a full personnel profile.\\
+\addlinespace
+Interoperability &
+The turnstile adapter is on the gate station.
+The human-resources adapter is in the integration module.\\
+\addlinespace
+Maintainability, simplicity, testability &
+One central deployable unit, one database, and mock adapters.
+Edge logic is tested with a scanner simulator.
+A later visitor credential is a new module.\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsubsection{Trade-offs}
+
+\begin{longtable}{@{}L{3.15cm}L{5.75cm}L{5.85cm}@{}}
+\caption{Trade-offs accepted by the selected style.}
+\label{tab:tradeoffs}\\
+\toprule
+\textbf{Trade-off} & \textbf{What is given up} & \textbf{What limits the damage}\\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Trade-off} & \textbf{What is given up} & \textbf{What limits the damage}\\
+\midrule
+\endhead
+Stale credentials at the edge &
+A revoked QR can still open a gate that has not yet received the revocation. &
+Revocations are pushed immediately and pulled at least every minute while the gate is online (BR-02).
+If the cached list is older than 24 hours, entry requires a guard.
+Exit stays allowed.
+Every scan is audited.\\
+\addlinespace
+Late events and duplicates &
+A gate that was offline can deliver events after the batch for day \(D\) has been sent.
+The same event can be uploaded twice. &
+Event identifiers are idempotent (BR-06).
+A closed batch is not rewritten.
+Late events form a flagged correction batch (BR-09).
+The month-end check still finishes before 12:00 on the first (BR-10).\\
+\addlinespace
+Edge devices &
+More nodes must be installed, updated, and protected, and some data resides in the factories. &
+The edge stores as little as possible, and it stores it encrypted.
+Updates are staged and can be rolled back, and they are not applied during a shift change.\\
+\addlinespace
+Clocks &
+The time of the scan comes from the edge clock. &
+NTP keeps skew within one second.
+The event stores both device time and server receive time (BR-08).\\
+\addlinespace
+One central unit &
+The central application is deployed as a whole.
+A defect there can affect every central function. &
+The current load makes this acceptable.
+The gates are unaffected, because they work offline.
+A module can be extracted later if isolation becomes necessary.\\
+\addlinespace
+Module boundaries &
+Without a rule, modules will read each other's tables. &
+A module depends on interfaces and does not query another module's schema.\\
+\addlinespace
+One database &
+There is no failure isolation of a database per service. &
+Each module has its own schema and is the only writer of that schema.\\
+\bottomrule
+\end{longtable}
+
+The logical view uses the six modules named above as its starting point.
+The deployment view places a gate station, or a small site node, in each factory, places the turnstile adapter on the plant network, and places the central application at the site fixed by OC-06.
+Those two views are specified in their own sections.
+Figure~\ref{fig:style} only fixes the style.

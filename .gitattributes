@@ -1,0 +1,18 @@
+﻿# Set default behavior to automatically normalize line endings
+* text=auto
+
+# Force Unix line endings for LaTeX and scripts
+*.tex text eol=lf
+*.bib text eol=lf
+*.sty text eol=lf
+*.cls text eol=lf
+*.py  text eol=lf
+*.yml text eol=lf
+*.md  text eol=lf
+
+# Binary files - no line ending conversion
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.pdf binary
+*.docx binary

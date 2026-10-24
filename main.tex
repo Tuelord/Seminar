@@ -1,0 +1,105 @@
+﻿% ============================================================
+%  main.tex  - Software Architecture Report (MLOps)
+%  RULE: Only member A (nhom truong) may edit this file.
+%        Every other member edits only their own section file.
+% ============================================================
+
+\documentclass[twoside,final]{hcmut-report}
+\usepackage{codespace}
+
+% -- Encodings ------------------------------------------------
+\usepackage{gensymb,textcomp}
+
+% -- Tables ---------------------------------------------------
+\usepackage[table]{xcolor}
+\usepackage{array,longtable,multicol,multirow,siunitx,tabularx}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+% -- Diagrams -------------------------------------------------
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric,fit}
+
+% -- Lists ----------------------------------------------------
+\usepackage{enumitem}
+
+% -- Figures --------------------------------------------------
+\usepackage{caption,float}
+\usepackage[export]{adjustbox}
+\graphicspath{{figures/}}
+
+% -- References -----------------------------------------------
+% Use \Cref{} instead of \ref{}
+\usepackage[nameinlink]{cleveref}
+
+% -- Hyperlinks -----------------------------------------------
+\usepackage{url}
+
+% -- Counter depth --------------------------------------------
+\AtBeginDocument{\counterwithin{lstlisting}{section}}
+
+% ============================================================
+%  Document metadata - edit here to update the cover page
+% ============================================================
+\coursename{Software Architecture}
+\reporttype{Final Report}
+\title{MLOps Architecture: Design, Rationale, and Layered Model}
+\advisor{& [Advisor name] &}
+\stuname{%
+  & Member A (Nhom truong) & XXXXXXX \\
+  & Member B               & XXXXXXX \\
+  & Member C               & XXXXXXX \\
+  & Member D               & XXXXXXX \\
+  & Member E               & XXXXXXX \\
+  & Member F               & XXXXXXX \\
+  & Member G (Ky thuat)    & XXXXXXX \\
+}
+
+% ============================================================
+\begin{document}
+
+\coverpage%
+
+% -- Member list ----------------------------------------------
+\section*{Member List \& Workload}
+\newcounter{memberrowno}
+\setcounter{memberrowno}{0}
+\begin{center}
+  \begin{tabular}{>{\stepcounter{memberrowno}\thememberrowno}llcc}
+    \toprule
+    \multicolumn{1}{c}{\textbf{No.}} & \textbf{Full name} & \textbf{Student ID} & \textbf{Contribution} \\
+    \midrule
+      & Member A (Nhom truong) & XXXXXXX & 100\% \\
+      & Member B               & XXXXXXX & 100\% \\
+      & Member C               & XXXXXXX & 100\% \\
+      & Member D               & XXXXXXX & 100\% \\
+      & Member E               & XXXXXXX & 100\% \\
+      & Member F               & XXXXXXX & 100\% \\
+      & Member G (Ky thuat)    & XXXXXXX & 100\% \\
+    \bottomrule
+  \end{tabular}
+\end{center}
+\clearpage
+
+% -- Table of contents ----------------------------------------
+\tableofcontents
+\listoffigures
+\listoftables
+\clearpage
+
+% ============================================================
+%  Sections - each member owns exactly one file below
+% ============================================================
+\input{sections/01-introduction}          % Member B
+\input{sections/02-mlops-concepts}        % Member C
+\input{sections/03-design-rationale}      % Member D
+\input{sections/04-pros-cons}             % Member E
+\input{sections/05-layered-architecture}  % Member F
+\input{sections/06-conclusion}            % Member A (nhom truong)
+
+% ============================================================
+%  Bibliography
+% ============================================================
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\end{document}

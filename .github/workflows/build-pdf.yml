@@ -1,0 +1,66 @@
+# .github/workflows/build-pdf.yml
+# Automatically builds the LaTeX report to PDF on every push / pull request.
+# The resulting PDF is uploaded as a GitHub Actions artifact so every team
+# member can download and verify it without installing LaTeX locally.
+
+name: Build LaTeX PDF
+
+on:
+  push:
+    branches: ["**"]          # run on every branch
+  pull_request:
+    branches: ["**"]
+
+permissions:
+  contents: read
+
+jobs:
+  build-pdf:
+    name: Compile report with latexmk
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Check out the repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Compile with latexmk inside the xu-cheng/latex-action Docker image.
+      #    This image ships TeX Live full, so all packages are available.
+      - name: Compile LaTeX document
+        uses: xu-cheng/latex-action@v3
+        with:
+          root_file: main.tex
+          latexmk_use_lualatex: false   # set to true if you switch to LuaLaTeX
+          latexmk_use_xelatex: false    # set to true if you switch to XeLaTeX
+          args: "-pdf -interaction=nonstopmode -file-line-error -shell-escape"
+
+      # 3. Upload the compiled PDF as a build artifact (kept for 30 days).
+      #    Download it from the Actions tab → select run → Artifacts → report-pdf.
+      - name: Upload PDF artifact
+        uses: actions/upload-artifact@v4
+        if: always()                    # upload even when compilation fails (for debugging)
+        with:
+          name: report-pdf
+          path: main.pdf
+          retention-days: 30
+
+      # 4. Show the full compiler log on failure so errors are easy to read.
+      - name: Show LaTeX log on failure
+        if: failure()
+        run: |
+          echo "=== main.log ==="
+          cat main.log || echo "Log file not found."
+
+      # 5. Summarise the build result in the GitHub Actions job summary.
+      - name: Write build summary
+        if: always()
+        run: |
+          if [ -f main.pdf ]; then
+            SIZE=$(du -sh main.pdf | cut -f1)
+            echo "### ✅ Build succeeded" >> $GITHUB_STEP_SUMMARY
+            echo "PDF size: **${SIZE}**" >> $GITHUB_STEP_SUMMARY
+            echo "Download from: **Actions → This run → Artifacts → report-pdf**" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### ❌ Build failed — PDF not generated" >> $GITHUB_STEP_SUMMARY
+            echo "Check the **Compile LaTeX document** step log above for errors." >> $GITHUB_STEP_SUMMARY
+          fi

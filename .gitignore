@@ -1,0 +1,17 @@
+# ── LaTeX build artefacts ──────────────────────────────────────────────────────
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.lof
+*.log
+*.lot
+*.out
+*.run.xml
+*.synctex.gz
+*.toc
+*.xdv
+# Compiled PDFs (download from GitHub Actions instead)
+*.pdf
