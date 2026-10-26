@@ -53,17 +53,17 @@ rigid~\cite{richards2020,bass2021}.
         repository, prediction service) ran on ``a mix of open source systems
         and components built in-house'' such as HDFS, Spark, Samza and
         Cassandra, managed by an API tier, web UI and workflow
-        system~\cite{uber2017}.
+        system~\cite{delbalso2017meet}.
   \item \textbf{2018.} Uber began ``factoring out Michelangelo's infrastructure
         into an explicit infrastructure layer'' so other teams could ``build
-        more specialized platforms'' on top of it~\cite{uber2018}.
+        more specialized platforms'' on top of it~\cite{delbalso2018scaling}.
   \item \textbf{2024 (2.0).} The architecture is described as \textbf{three
         planes} (control, offline data and online data) built on a bottom layer
-        of \textbf{plug-and-play components}~\cite{uber2024}.
+        of \textbf{plug-and-play components}~\cite{wang2024predictive}.
 \end{itemize}
 
 \subsubsection{Our five-layer view}
-To Uber's three planes and plug-and-play components~\cite{uber2024} \textbf{we
+To Uber's three planes and plug-and-play components~\cite{wang2024predictive} \textbf{we
 add two layers of our own}, built from components Uber names: an
 \emph{experience layer} (MA Studio, Canvas) on top and an \emph{infrastructure
 layer} (clusters, GPUs, storage) at the bottom (\Cref{fig:layered-view}).
@@ -88,25 +88,25 @@ layer} (clusters, GPUs, storage) at the bottom (\Cref{fig:layered-view}).
     \midrule
     L5 Experience & Define and inspect ML work
       & MA Studio (no-code UI), Canvas (ML monorepo, CI/CD)
-      & Web UI, Git, Bazel, Docker~\cite{uber2024} \\
+      & Web UI, Git, Bazel, Docker~\cite{wang2024predictive} \\
     L4 Control plane & User-facing APIs; lifecycle of all ML entities
       & API server, controllers, job federation, Gallery
-      & Kubernetes API server, etcd, controller manager~\cite{uber2024} \\
+      & Kubernetes API server, etcd, controller manager~\cite{wang2024predictive} \\
     L3a Offline data plane & Features, training, evaluation, batch inference
       & Palette batch pipelines, training pipelines, batch scoring
-      & Spark, Ray~\cite{uber2024}; Hive/HDFS~\cite{uber2017} \\
+      & Spark, Ray~\cite{wang2024predictive}; Hive/HDFS~\cite{delbalso2017meet} \\
     L3b Online data plane & Real-time inference and feature serving
       & Online prediction service, online feature serving, streaming feature jobs
-      & Triton~\cite{uber2024}; Cassandra/Redis~\cite{uber2024palette};
-        Kafka, Samza~\cite{uber2017} \\
+      & Triton~\cite{wang2024predictive}; Cassandra/Redis~\cite{uber2024palette};
+        Kafka, Samza~\cite{delbalso2017meet} \\
     L2 Plug-and-play & Swappable engines
       & Compute and serving engines, ML frameworks
       & Spark, Ray, Horovod, Triton, XGBoost, TensorFlow,
-        PyTorch~\cite{uber2024} \\
+        PyTorch~\cite{wang2024predictive} \\
     L1 Infrastructure & Compute, storage, messaging
       & Clusters, CPU/GPU pool, storage
-      & Kubernetes (from Peloton/Mesos), 5,000+ GPUs~\cite{uber2024};
-        HDFS, Cassandra, Kafka~\cite{uber2017} \\
+      & Kubernetes (from Peloton/Mesos), 5,000+ GPUs~\cite{wang2024predictive};
+        HDFS, Cassandra, Kafka~\cite{delbalso2017meet} \\
     \bottomrule
   \end{tabularx}
 \end{table}
@@ -114,35 +114,35 @@ layer} (clusters, GPUs, storage) at the bottom (\Cref{fig:layered-view}).
 \paragraph{Control plane (L4).}
 \begin{itemize}
   \item It ``defines user-facing APIs and manages the lifecycle of all entities
-        in the system''~\cite{uber2024}.
+        in the system''~\cite{wang2024predictive}.
   \item It follows the Kubernetes Operator pattern and Kubernetes API
         conventions, using the API server, etcd and controller
-        manager~\cite{uber2024}.
+        manager~\cite{wang2024predictive}.
   \item Its standard ML entities are Project, Pipeline, PipelineRun, Model,
-        Revision, InferenceServer and Deployment~\cite{uber2024}. \emph{Our
+        Revision, InferenceServer and Deployment~\cite{wang2024predictive}. \emph{Our
         interpretation:} given the Kubernetes conventions and the named ``job
-        CRD controller''~\cite{uber2024}, they are likely Kubernetes custom
+        CRD controller''~\cite{wang2024predictive}, they are likely Kubernetes custom
         resources, as Palette's Feature and FeatureStore
         are~\cite{uber2024palette}.
   \item The API is \emph{declarative}: users state the desired result, and
         controllers make reality match it. Changes can come from the UI or from
-        code in Git~\cite{uber2024}.
+        code in Git~\cite{wang2024predictive}.
   \item The \emph{job federation} controller spreads Spark and Ray jobs across
         clusters, hiding ``the region, and zone and cluster
-        details''~\cite{uber2024}.
-  \item Gallery is the model and metadata registry~\cite{uber2024}. It continues
+        details''~\cite{wang2024predictive}.
+  \item Gallery is the model and metadata registry~\cite{wang2024predictive}. It continues
         1.0's versioned model repository, which stored each model's
-        configuration, metrics and parameters~\cite{uber2017}.
+        configuration, metrics and parameters~\cite{delbalso2017meet}.
 \end{itemize}
 
 \paragraph{Offline data plane (L3a).}
 \begin{itemize}
   \item It ``does the heavy lifting on big data processing'': features,
-        training, evaluation and batch inference~\cite{uber2024}.
+        training, evaluation and batch inference~\cite{wang2024predictive}.
   \item Work runs as pipelines, which are DAGs of steps executed on Spark or
         Ray. Checkpoints let a pipeline resume without repeating finished
-        steps~\cite{uber2024}.
-  \item Palette supports batch feature pipelines~\cite{uber2024}, and offline
+        steps~\cite{wang2024predictive}.
+  \item Palette supports batch feature pipelines~\cite{wang2024predictive}, and offline
         features are kept as daily Hive snapshots~\cite{uber2024palette}.
 \end{itemize}
 
@@ -150,14 +150,14 @@ layer} (clusters, GPUs, storage) at the bottom (\Cref{fig:layered-view}).
 \begin{itemize}
   \item It ``handles real-time model inference and feature serving'' for Uber's
         other microservices, through RPC services and streaming
-        jobs~\cite{uber2024}.
+        jobs~\cite{wang2024predictive}.
   \item The Online Prediction Service (OPS) now uses Triton, which Uber
-        describes as optimised for low-latency GPU serving~\cite{uber2024}.
+        describes as optimised for low-latency GPU serving~\cite{wang2024predictive}.
   \item Online features live in Cassandra or Redis~\cite{uber2024palette}.
   \item In 2017, P95 latency was under 5\,ms for models without
         Cassandra-backed features and under 10\,ms with
-        them~\cite{uber2017}. By 2024 the platform served 10 million
-        predictions per second at peak~\cite{uber2024}.
+        them~\cite{delbalso2017meet}. By 2024 the platform served 10 million
+        predictions per second at peak~\cite{wang2024predictive}.
 \end{itemize}
 
 % ------------------------------------------------------------
@@ -168,7 +168,7 @@ Dependencies point strictly \textbf{top-down}: upper layers command lower ones,
 and lower layers never call upward. Information returns upward only in two ways:
 \begin{itemize}
   \item as \textbf{status} written back to control-plane resources (Kubernetes
-        convention~\cite{uber2024});
+        convention~\cite{wang2024predictive});
   \item as \textbf{data} left in shared storage.
 \end{itemize}
 \Cref{fig:layered-communication} traces the main interactions.
@@ -184,29 +184,29 @@ and lower layers never call upward. Information returns upward only in two ways:
 
 \begin{enumerate}
   \item An ML engineer submits a desired state (e.g.\ a Pipeline or Deployment)
-        from MA Studio or Canvas~\cite{uber2024}.
+        from MA Studio or Canvas~\cite{wang2024predictive}.
   \item Controllers watch the API server, act to close the gap between desired
-        and actual state, and report status~\cite{uber2024}.
+        and actual state, and report status~\cite{wang2024predictive}.
   \item The job federation controller launches Spark or Ray jobs on any
-        suitable cluster~\cite{uber2024}.
+        suitable cluster~\cite{wang2024predictive}.
   \item Pipeline steps read the data lake and write features to the offline
-        store~\cite{uber2017}.
+        store~\cite{delbalso2017meet}.
   \item Training stores the model, its configuration and metrics as a new
         version in the model repository, which is Gallery in
-        2.0~\cite{uber2017,uber2024}. This is a write into a shared store
+        2.0~\cite{delbalso2017meet,wang2024predictive}. This is a write into a shared store
         (Cassandra in 2017), not a call to the control plane's logic.
   \item \emph{Batch path:} historical features are loaded from HDFS into
-        Cassandra~\cite{uber2017}.
+        Cassandra~\cite{delbalso2017meet}.
   \item \emph{Speed path:} streaming jobs aggregate Kafka events into
-        Cassandra~\cite{uber2017}.
+        Cassandra~\cite{delbalso2017meet}.
   \item A controller rolls the model out to OPS, with ``safe and incremental
-        zonal rollout'' and automatic rollback~\cite{uber2024}. Models are
+        zonal rollout'' and automatic rollback~\cite{wang2024predictive}. Models are
         referenced by ID or tag, enabling side-by-side versions and A/B
-        tests~\cite{uber2017}.
+        tests~\cite{delbalso2017meet}.
   \item At prediction time, the model's features are read from
-        Cassandra~\cite{uber2017}.
+        Cassandra~\cite{delbalso2017meet}.
   \item Uber's product microservices call the prediction service over
-        RPC~\cite{uber2017,uber2024}.
+        RPC~\cite{delbalso2017meet,wang2024predictive}.
 \end{enumerate}
 
 Two observations follow:
@@ -217,7 +217,7 @@ Two observations follow:
   \item \textbf{Closed and open layers.} The control plane is \emph{closed}:
         every change goes through its declarative API. The plug-and-play layer
         is partly \emph{open}: the managed solution supports a curated subset,
-        but advanced users can ``bring your own components''~\cite{uber2024}.
+        but advanced users can ``bring your own components''~\cite{wang2024predictive}.
 \end{itemize}
 
 % ------------------------------------------------------------
@@ -237,22 +237,22 @@ job (\Cref{fig:layered-styles}).
 
 \begin{itemize}
   \item \textbf{Pipe-and-filter: offline data plane.} Pipelines are DAGs of
-        steps, each consuming earlier outputs~\cite{uber2024}. Feature
+        steps, each consuming earlier outputs~\cite{wang2024predictive}. Feature
         transformers are chained before the model, and Triton joined OPS as
-        ``a new Spark transformer''~\cite{uber2024}.
+        ``a new Spark transformer''~\cite{wang2024predictive}.
   \item \textbf{Lambda: Palette, spanning both data planes} (\emph{our
         interpretation}). Batch and speed paths meet in a single serving
-        store, Cassandra~\cite{uber2017}. This matches Lambda's batch, speed
+        store, Cassandra~\cite{delbalso2017meet}. This matches Lambda's batch, speed
         and serving layers, although Uber never uses the term.
   \item \textbf{Event-driven reconciliation: control plane.} Following the
         Kubernetes Operator pattern, controllers react to resource
-        changes~\cite{uber2024}.
+        changes~\cite{wang2024predictive}.
   \item \textbf{Plugin (microkernel-like): plug-and-play layer.}
         Plug-and-play is one of Uber's six design principles. Stable
-        entities hide interchangeable engines~\cite{uber2024}.
+        entities hide interchangeable engines~\cite{wang2024predictive}.
   \item \textbf{Client-server / microservices: online data plane.} The
         prediction service answers RPC calls from other Uber
-        services~\cite{uber2017}.
+        services~\cite{delbalso2017meet}.
 \end{itemize}
 
 Layering decides \emph{what may depend on what}; each layer picks the style that
@@ -266,20 +266,20 @@ serves its own goal.
 
 \paragraph{Benefit 1. Lower layers change without disturbing upper layers.}
 Uber is migrating its clusters from Peloton/Mesos to Kubernetes and extending to
-cloud GPUs on OCI and GCP~\cite{uber2024}. The job federation layer hides
-cluster details for ``job portability''~\cite{uber2024}, so engineers keep
+cloud GPUs on OCI and GCP~\cite{wang2024predictive}. The job federation layer hides
+cluster details for ``job portability''~\cite{wang2024predictive}, so engineers keep
 submitting the same pipelines while the infrastructure underneath changes. This
 is the isolation the style promises~\cite{richards2020}.
 
 \paragraph{Benefit 2. Engines are swapped inside a layer.}
 \begin{itemize}
   \item Neuropod ``lacks continuous community support and is being
-        deprecated'', so Triton replaced it in OPS~\cite{uber2024}.
+        deprecated'', so Triton replaced it in OPS~\cite{wang2024predictive}.
   \item Uber ``replaced Spark-based XGBoost and DL trainers with Ray-based
         trainers \ldots{} for better scalability and reliability''. The earlier
         Horovod-on-Spark setup had ``introduced many operational
-        complexities''~\cite{uber2024}. Horovod itself remains the distributed
-        training framework~\cite{uber2024}.
+        complexities''~\cite{wang2024predictive}. Horovod itself remains the distributed
+        training framework~\cite{wang2024predictive}.
   \item \emph{Our interpretation:} teams describe \emph{what} to train and
         deploy (Pipeline, Model, Deployment), not \emph{which engine} runs it,
         so these swaps stayed inside the lower layers.
@@ -287,8 +287,8 @@ is the isolation the style promises~\cite{richards2020}.
 
 \paragraph{Benefit 3. Reuse at scale.}
 The 2018 infrastructure layer let teams build specialised platforms on
-it~\cite{uber2018}. By 2024 one platform carried about 400 projects, 20,000+
-training jobs per month and 5,000+ production models~\cite{uber2024}.
+it~\cite{delbalso2018scaling}. By 2024 one platform carried about 400 projects, 20,000+
+training jobs per month and 5,000+ production models~\cite{wang2024predictive}.
 
 \subsubsection{Limitations}
 
@@ -313,19 +313,19 @@ training jobs per month and 5,000+ production models~\cite{uber2024}.
 \paragraph{Limitation 2. Extra hops cost latency} (\emph{our interpretation} of
 Uber's data). Models that read features from the Cassandra storage layer had a
 P95 target of under 10\,ms, against under 5\,ms for models that did
-not~\cite{uber2017}. Every hop into a lower layer on the request path consumes
+not~\cite{delbalso2017meet}. Every hop into a lower layer on the request path consumes
 latency budget.
 
 \paragraph{Limitation 3. Rigidity and cross-layer change.}
 \begin{itemize}
   \item Michelangelo 1.0's config- and UI-driven path slowed iteration. Uber's
         lesson was ``let developers use the tools that they want'', which led
-        it to add PyML~\cite{uber2018}.
+        it to add PyML~\cite{delbalso2018scaling}.
   \item The Spark-based feature transformation DSL could not run on GPUs, which
-        limited low-latency deep-learning serving~\cite{uber2024}. A concern
+        limited low-latency deep-learning serving~\cite{wang2024predictive}. A concern
         shared by several layers needs coordinated change across all of them.
   \item Uber's answer was to open layers selectively (Canvas, ``bring your own
-        components'')~\cite{uber2024}.
+        components'')~\cite{wang2024predictive}.
 \end{itemize}
 
 \subsubsection{Overall assessment}

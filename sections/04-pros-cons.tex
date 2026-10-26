@@ -22,53 +22,53 @@ Uber observed that many modelling problems use identical or similar
 features, so it built a shared feature store in which teams publish
 features with only a small amount of extra metadata (owner, description,
 SLA) and consume them by referencing a canonical name in the model
-configuration~\cite{uber2017michelangelo}. The platform then joins the
+configuration~\cite{delbalso2017meet}. The platform then joins the
 right offline data for training and fetches the right online values at
 prediction time. The store held about 10{,}000 features in
-2017~\cite{uber2017michelangelo}; by 2024 its successor, Palette, hosted
-more than 20{,}000 features available out of the box~\cite{uber2024predictive}.
+2017~\cite{delbalso2017meet}; by 2024 its successor, Palette, hosted
+more than 20{,}000 features available out of the box~\cite{wang2024predictive}.
 Reuse removes duplicated pipeline work, which matters because building
 data pipelines is one of the most costly parts of an ML
-solution~\cite{uber2017michelangelo}.
+solution~\cite{delbalso2017meet}.
 
 \paragraph{S2. A standardised, end-to-end workflow.}
 Michelangelo replaced team-specific scripts and custom serving containers
 with one six-step workflow (manage data, train, evaluate, deploy, predict,
 monitor) that applies to classification, regression and time-series
-problems alike~\cite{uber2017michelangelo}. Standardisation shows up in
+problems alike~\cite{delbalso2017meet}. Standardisation shows up in
 concrete mechanisms: every trained model is stored as a versioned record
-with its configuration, data references and metrics~\cite{uber2017michelangelo};
+with its configuration, data references and metrics~\cite{delbalso2017meet};
 deployment and monitoring sit behind a single click in the
-UI~\cite{uber2018scaling}; and a new model can be deployed to the same
+UI~\cite{delbalso2018scaling}; and a new model can be deployed to the same
 \emph{tag} as an old one, so that client services switch models without
-any code change~\cite{uber2017michelangelo}. Michelangelo~2.0 extended
+any code change~\cite{delbalso2017meet}. Michelangelo~2.0 extended
 this discipline to code: model code and configuration live in a version-controlled
 monorepo with code review and CI/CD, including changes made
-through the UI~\cite{uber2024predictive}.
+through the UI~\cite{wang2024predictive}.
 
 \paragraph{S3. Scalability.}
 Because models are stateless, online serving scales horizontally by
 adding hosts behind a load balancer, and batch scoring scales by adding
-Spark executors~\cite{uber2017michelangelo}. In 2017 Uber reported P95
+Spark executors~\cite{delbalso2017meet}. In 2017 Uber reported P95
 latency below 5\,ms for models that need no stored features and below
 10\,ms for models that read from the Cassandra feature store, with the
 busiest models serving over 250{,}000 predictions per
-second~\cite{uber2017michelangelo}. By 2024 the platform managed about
+second~\cite{delbalso2017meet}. By 2024 the platform managed about
 400 active projects, more than 20{,}000 training jobs per month and more
 than 5{,}000 production models, serving up to 10 million real-time
-predictions per second at peak~\cite{uber2024predictive}.
+predictions per second at peak~\cite{wang2024predictive}.
 
 \paragraph{S4. Project tiering.}
 Michelangelo~2.0 introduced a four-level tiering scheme: tier~1 covers
 models in core trip and eater flows such as ETA, safety and fraud
 detection, while tier~4 covers experimental use
-cases~\cite{uber2024predictive}. The tier determines resource
+cases~\cite{wang2024predictive}. The tier determines resource
 investment, outage handling and how strictly best practices are enforced.
 This fixed a weakness of version~1.0, where every project was treated the
-same and high-impact projects were under-invested~\cite{uber2024predictive}.
+same and high-impact projects were under-invested~\cite{wang2024predictive}.
 Tiering is paired with the Model Excellence Score, which applies the SLA
 concept from site reliability engineering to model quality (accuracy,
-freshness, feature quality)~\cite{uber2024predictive}.
+freshness, feature quality)~\cite{wang2024predictive}.
 
 % ---------------------------------------------------------------------
 \subsection{Weaknesses}
@@ -77,9 +77,9 @@ freshness, feature quality)~\cite{uber2024predictive}.
 \paragraph{W1. Heavyweight for prototyping.}
 The first version was built around Apache Spark for large-scale processing
 and training and Java for low-latency serving, because the most urgent use
-cases were very high scale~\cite{uber2018scaling}. Uber admits this
+cases were very high scale~\cite{delbalso2018scaling}. Uber admits this
 structure worked well for production but carried overhead and lacked
-flexibility and ease of use during early prototyping~\cite{uber2018scaling}.
+flexibility and ease of use during early prototyping~\cite{delbalso2018scaling}.
 Every supported model type is built into the training and serving systems,
 so these systems depend on the libraries of all model types, and the
 dependency graph grows with each type added~\cite{uber2018pyml}. Adding a
@@ -89,7 +89,7 @@ Hive or extending the DSL, which Uber calls ``a fairly invasive
 operation''~\cite{uber2018pyml}.
 Version~1.0 also had weak deep-learning support: teams such as Maps ETA
 had to spend months building their own DL toolkits before training a first
-DL model~\cite{uber2024predictive}.
+DL model~\cite{wang2024predictive}.
 
 \paragraph{W2. Centralisation creates a large blast radius and a bottleneck.}
 A central platform means that one fault can affect many teams at once. In
@@ -102,32 +102,32 @@ feature groups~\cite{uber2024palette}. Centralisation also creates an
 organisational bottleneck: when requirements outpaced the platform
 roadmap, product teams were tempted to build their own systems, and Uber
 needed a group of senior leaders to prevent fragmentation and technical
-debt~\cite{uber2018scaling}. Fragmentation happened anyway; under version~1.0 teams
+debt~\cite{delbalso2018scaling}. Fragmentation happened anyway; under version~1.0 teams
 used several semi-isolated tools (DSW, ML Explorer, uFlow/uScorer), each
-with different UI patterns~\cite{uber2024predictive}.
+with different UI patterns~\cite{wang2024predictive}.
 
 \paragraph{W3. Tight coupling to Uber's in-house infrastructure.}
 Michelangelo is an internal service built on top of Uber's own data lake,
 Kafka brokers, Samza streaming engine, managed Cassandra clusters and
-in-house service provisioning and deployment tools~\cite{uber2017michelangelo}.
+in-house service provisioning and deployment tools~\cite{delbalso2017meet}.
 Even in 2024 its compute clusters were still being migrated from
-Peloton/Mesos to Kubernetes~\cite{uber2024predictive}.
+Peloton/Mesos to Kubernetes~\cite{wang2024predictive}.
 This coupling is what makes the platform fast inside Uber, but it means
 the design cannot be adopted as a product by other organisations, and
 each infrastructure migration becomes a platform-wide project.
 
 \paragraph{W4. Scala, configuration and UI workflows slowed experimentation.}
 Early feature transformations were written in a DSL implemented as a
-subset of Scala~\cite{uber2017michelangelo}, and models were configured
+subset of Scala~\cite{delbalso2017meet}, and models were configured
 through a web UI or configuration files. Uber reports that this focus led
 it away from the mature programmatic interfaces that model developers
 already knew, even though modelling is highly
-iterative~\cite{uber2018scaling}. Uber calls this ``an explicitly chosen
+iterative~\cite{delbalso2018scaling}. Uber calls this ``an explicitly chosen
 trade-off to favor performance and scalability over flexibility'' that made
 it hard for data science teams to iterate quickly on new
 models~\cite{uber2018pyml}. In version~1.0, collaboration in the UI
 and notebooks relied on manual copying and merging, without version
-control, branching or code review~\cite{uber2024predictive}.
+control, branching or code review~\cite{wang2024predictive}.
 
 % ---------------------------------------------------------------------
 \subsection{Lessons Reported by Uber}
@@ -140,14 +140,14 @@ directly explain the strengths and weaknesses above.
   \item \textbf{Data is the hardest part of ML.} Modellers spend most of
   their time selecting and transforming features and building pipelines to
   deliver them to production, and broken data is the most common cause of
-  problems in production ML systems~\cite{uber2018scaling}. This is the
+  problems in production ML systems~\cite{delbalso2018scaling}. This is the
   main justification for investing in the feature store (S1).
 
   \item \textbf{Making open-source components work at scale is expensive.}
   Although Spark and Cassandra are mature projects, it took more than a
   year of sustained effort for \emph{each} of them to work reliably at
   Uber's scale; some commercial toolkits tried early on were
-  abandoned~\cite{uber2018scaling}.
+  abandoned~\cite{delbalso2018scaling}.
 
   \item \textbf{Shared metadata needs server-side safeguards.} After the
   2021 Palette incident, Uber spent more than a year re-architecting the
@@ -161,14 +161,14 @@ directly explain the strengths and weaknesses above.
   \item \textbf{Offer a hybrid: an easy option and a high-scale option.}
   Uber concluded it should let developers use the tools they want, and
   settled on offering a high-scale option that is harder to use alongside
-  a lower-scale option that is very easy to use~\cite{uber2018scaling}.
+  a lower-scale option that is very easy to use~\cite{delbalso2018scaling}.
 PyML was the first example: any Python model can be packaged and deployed
 quickly, and once it proves its value and needs high-scale online serving,
 it can be re-implemented natively in Michelangelo for lower latency and
 better resource efficiency~\cite{uber2018pyml}.
   The 2024 architecture generalises this: MA Studio serves standard
   workflows without code, while Canvas gives power users code-level access
-  for advanced cases such as deep learning~\cite{uber2024predictive}.
+  for advanced cases such as deep learning~\cite{wang2024predictive}.
 \end{enumerate}
 
 % ---------------------------------------------------------------------
@@ -182,28 +182,28 @@ We state the three most important ones explicitly.
   \item \textbf{Scale and standardisation vs.\ iteration speed.}
   Building on Spark, Java and a Scala DSL \emph{gained} reliable,
   high-throughput production pipelines and consistent features between
-  training and serving~\cite{uber2017michelangelo}, but \emph{lost}
-  developer velocity during prototyping~\cite{uber2018scaling,uber2018pyml}.
+  training and serving~\cite{delbalso2017meet}, but \emph{lost}
+  developer velocity during prototyping~\cite{delbalso2018scaling,uber2018pyml}.
 
   \item \textbf{Centralisation vs.\ resilience and autonomy.}
   A single platform and a single feature store \emph{gained} reuse,
-  governance and consistent quality standards~\cite{uber2024predictive},
+  governance and consistent quality standards~\cite{wang2024predictive},
   but \emph{lost} fault isolation (one metadata change affected many
   tier-1 services~\cite{uber2024palette}) and made product teams dependent
-  on the platform roadmap~\cite{uber2018scaling}.
+  on the platform roadmap~\cite{delbalso2018scaling}.
 
   \item \textbf{End-to-end convenience vs.\ flexibility.}
   An integrated workflow \emph{gained} a fast path for common use cases,
   but \emph{lost} flexibility for specialised domains, which pushed Uber
   to start factoring out an explicit infrastructure layer for teams building their
-  own platforms~\cite{uber2018scaling} and to allow ``bring your own''
-  components outside the managed subset~\cite{uber2024predictive}.
+  own platforms~\cite{delbalso2018scaling} and to allow ``bring your own''
+  components outside the managed subset~\cite{wang2024predictive}.
 \end{itemize}
 
 A related trade-off concerns model choice: deep learning \emph{gains}
 accuracy on complex problems but \emph{costs} significant infrastructure,
 and Uber notes that in several cases XGBoost outperformed DL in both
-performance and cost~\cite{uber2024predictive}.
+performance and cost~\cite{wang2024predictive}.
 
 % ---------------------------------------------------------------------
 \subsection{Comparison with TFX and Metaflow}
@@ -230,33 +230,33 @@ infrastructure.
     \textbf{TFX (Google)} & \textbf{Metaflow (Netflix)} \\
     \midrule
     Type &
-      Centralised internal ML-as-a-service platform~\cite{uber2017michelangelo} &
+      Centralised internal ML-as-a-service platform~\cite{delbalso2017meet} &
       Pipeline framework of standard components and
       libraries~\cite{tfxguide} &
       Python library with a unified API over the
       infrastructure stack~\cite{metaflowdocs} \\
     \addlinespace
     Availability &
-      Internal to Uber only~\cite{uber2017michelangelo} &
+      Internal to Uber only~\cite{delbalso2017meet} &
       Open source; originated as Google's internal
       platform~\cite{baylor2017tfx,tfxguide} &
       Open source (Apache~2.0)~\cite{metaflowdocs} \\
     \addlinespace
     Who operates it &
-      Dedicated Michelangelo platform team~\cite{uber2018scaling} &
+      Dedicated Michelangelo platform team~\cite{delbalso2018scaling} &
       The adopting team, on its chosen orchestrator~\cite{tfxguide} &
       The adopting team, on its own cloud or Kubernetes
       account~\cite{metaflowdocs} \\
     \addlinespace
     ML frameworks &
       Multi-framework: Spark ML, XGBoost, TensorFlow, PyTorch,
-      LLMs~\cite{uber2024predictive} &
+      LLMs~\cite{wang2024predictive} &
       Centred on TensorFlow~\cite{baylor2017tfx} &
       Any Python library~\cite{metaflowdocs} \\
     \addlinespace
     Feature management &
       Shared feature store (Palette) with offline and online
-      stores~\cite{uber2024predictive} &
+      stores~\cite{wang2024predictive} &
       Transform component applies the same preprocessing in training and
       serving; feature sharing is not a core component~\cite{tfxguide} &
       Patterns for reading from warehouses and lakes; a feature store is
@@ -264,7 +264,7 @@ infrastructure.
     \addlinespace
     Online serving &
       Built-in low-latency prediction service (P95 under
-      10\,ms)~\cite{uber2017michelangelo} &
+      10\,ms)~\cite{delbalso2017meet} &
       Serving infrastructure is part of the
       platform~\cite{baylor2017tfx} &
       ``Deployment'' means production workflow orchestration; online
@@ -272,7 +272,7 @@ infrastructure.
     \addlinespace
     Orchestration and compute &
       Kubernetes-style control plane; Spark and Ray
-      jobs~\cite{uber2024predictive} &
+      jobs~\cite{wang2024predictive} &
       Apache Airflow, Apache Beam, Kubeflow
       Pipelines~\cite{tfxguide} &
       AWS Batch, Step Functions, Kubernetes, Argo,
@@ -280,7 +280,7 @@ infrastructure.
     \addlinespace
     Developer experience &
       Web UI (MA Studio) plus code-driven workflows
-      (Canvas)~\cite{uber2024predictive} &
+      (Canvas)~\cite{wang2024predictive} &
       Python pipeline definitions~\cite{tfxguide} &
       Local-first Python; prototype on a laptop, then
       scale~\cite{metaflowdocs} \\
@@ -292,7 +292,7 @@ infrastructure.
 The comparison shows two different answers to the same problem. Both
 Michelangelo and TFX were created because ad-hoc glue code and
 team-specific scripts made ML fragile and slow to reach
-production~\cite{uber2017michelangelo,baylor2017tfx}, and Metaflow was
+production~\cite{delbalso2017meet,baylor2017tfx}, and Metaflow was
 built to raise data-scientist productivity from prototype to
 production~\cite{metaflowdocs}.
 Michelangelo answers with a centralised service that owns the whole
@@ -305,7 +305,7 @@ infrastructure it already has, which makes them portable but leaves
 feature management and, in Metaflow's case, online serving to other
 tools. Interestingly, the designs are converging: Michelangelo~2.0
 moved towards plug-and-play components and code-first workflows that
-resemble a framework~\cite{uber2024predictive}, while TFX itself began as
+resemble a framework~\cite{wang2024predictive}, while TFX itself began as
 a centralised internal platform at Google~\cite{baylor2017tfx}. For an
 organisation of Uber's size, with hundreds of projects and strict latency
 requirements, a central platform pays off; for smaller teams, a library

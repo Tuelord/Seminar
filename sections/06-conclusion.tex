@@ -1,83 +1,56 @@
 ﻿% =====================================================================
 % sections/06-conclusion.tex  --  Member A
-% STATUS: DRAFT v0, written from the task assignment of B, C and D
-%         before their sections were available.
-% Every sentence marked "% TODO-B/C/D" must be checked against the final
-% text of that member and its citation keys before submission.
+% Summarises Sections 2-6 (A, B, C, D). Re-check after any later change
+% to B/C/D.
 % =====================================================================
 
 \section{Conclusion}
 \label{sec:conclusion}
 
 This report examined Uber's Michelangelo as a case study in the software
-architecture of MLOps platforms. Section~\ref{sec:mlops-concepts} showed
-that the platform provides a concrete realisation of six core MLOps
-concepts: an explicit ML lifecycle, CI/CD and continuous training, a
-feature store, a model registry, safeguards against training/serving
-skew, and continuous monitoring for drift. Its evolution from predictive
-ML on tabular data, through deep learning, to generative AI demonstrates
-that a centralised platform can absorb successive shifts in ML technology
-without being rebuilt from scratch~\cite{wang2024predictive}.
+architecture of MLOps platforms. \Cref{sec:mlops-concepts} showed that it
+realises six core MLOps concepts, from an explicit ML lifecycle to
+drift monitoring, and \Cref{sec:michelangelo-overview} traced its
+evolution from predictive ML to generative AI.
 
-% TODO-B: align with the problem list and requirement->decision table in
-%         Section 3 (sec:design-rationale); replace/add B's citation keys.
-The design rationale in Section~\ref{sec:design-rationale} traces the
-platform's main components back to concrete problems Uber faced in 2015:
-fragmented tools, untracked experiments, the absence of a standard
-deployment path and training limited to a single
-machine~\cite{delbalso2017meet}. Shared features motivated the feature
-store, one-click deployment motivated the model repository with tagged
-models, consistency between training and serving motivated a single
-feature DSL, and scale motivated distributed engines such as Spark,
-Horovod and, later, Ray. These decisions target scalability, low serving
-latency, reuse and reproducibility as the primary quality attributes.
+\Cref{sec:design-rationale} showed that Michelangelo's main components
+follow directly from six problems Uber faced in 2015, including fragmented
+tools, desktop-sized training, the lack of experiment tracking and of a
+deployment path, and duplicated feature work~\cite{delbalso2017meet}. The
+resulting decisions (a shared feature store, one feature DSL for training
+and serving, distributed training, a versioned model repository with
+tag-based deployment, and a shared prediction service) target
+scalability, low latency, reusability, reproducibility and deployability.
 
-% TODO-C: align with C's final lists of pros/cons, trade-offs, lessons
-%         and the Michelangelo/TFX/Metaflow comparison (sec:pros-cons).
-The analysis in Section~\ref{sec:pros-cons} shows that these benefits come
-at a cost. Centralisation enables reuse, standardised workflows and
-tiered support for projects of different business impact, but it also
-makes the platform heavy, couples it to Uber-specific infrastructure, and
-initially slowed experimentation through Scala-, configuration- and
-UI-based workflows~\cite{delbalso2017meet,delbalso2018scaling,wang2024predictive}. Uber's
-own lessons reinforce this picture: data is the hardest part of ML, mature
-open-source components such as Spark and Cassandra each required more
-than a year of effort to run reliably at Uber's scale, and the platform
-converged on a hybrid offering that combines an easy-to-use option with a
-high-scale option~\cite{delbalso2018scaling}.
-% TODO-C: add one sentence on the 2021 Palette metadata incident with C's citation.
-% TODO-C: add one sentence summarising the comparison table (centralised
-%         platform vs. library/framework approaches such as TFX and Metaflow).
+\Cref{sec:pros-cons} showed that these benefits and their costs stem from
+the same decisions. Centralisation delivered feature reuse, a
+standardised workflow, high scale and project tiering, but also made the
+platform heavyweight for prototyping, tightly coupled to Uber's
+infrastructure, and exposed to platform-wide failures such as the 2021
+Palette metadata incident~\cite{delbalso2018scaling,uber2024palette}.
+Uber's response, an easy-to-use option alongside a high-scale one,
+illustrates the central trade-off between standardisation and iteration
+speed~\cite{delbalso2018scaling}. Compared with TFX and Metaflow, which
+are frameworks operated by each adopting team, Michelangelo is a
+centralised service; the two approaches are, however, converging.
 
-% TODO-D: align with D's final evaluation (sec:layered-architecture).
-Section~\ref{sec:layered-architecture} interpreted Michelangelo~2.0 as a
-layered architecture with a control plane, an offline data plane and an
-online data plane~\cite{wang2024predictive}. Separating declarative
-entity management from batch and real-time execution allows execution
-engines to be replaced behind stable interfaces, as illustrated by the
-replacement of Spark-based trainers with Ray-based
-ones~\cite{wang2024predictive}; other styles, such as pipelines, the
-lambda pattern for batch and streaming features, and plug-in execution
-engines, are contained within individual layers.
-% TODO-D: add the limitation of layering identified by D.
+\Cref{sec:layered-architecture} interpreted Michelangelo~2.0 as a layered
+architecture whose core is a control plane over offline and online data
+planes~\cite{wang2024predictive}, with other styles, such as
+pipe-and-filter, plug-in engines and event-driven reconciliation, inside
+individual layers. Layering let Uber migrate infrastructure and replace
+engines, for example Spark-based trainers with Ray-based ones, without
+disturbing users~\cite{wang2024predictive}, at the cost of fragile shared
+layers, per-hop latency and rigidity.
 
-Three general lessons emerge for architects of ML platforms. First, the
-dominant engineering challenge lies in data and feature management
-rather than in model training, which justifies treating the feature
-store as a first-class architectural element. Second, consistency between
-offline and online paths is best enforced architecturally, through shared
-definitions and a single code path, rather than by convention; likewise,
-reproducibility proved central to model management even though Gallery
-was not originally designed for it~\cite{sun2020gallery}. Third, a
-platform must balance standardisation against flexibility; Michelangelo
-addresses this through modular, plug-and-play components and a two-level
-offering of predefined workflow templates for most users and low-level
-infrastructure access for advanced users~\cite{wang2024predictive}.
-
-This study has two main limitations. Michelangelo is proprietary, so our
-analysis relies on Uber's publications and engineering reports rather
-than on direct inspection, and our demonstrator approximates its
-components with open-source tools. Future work could extend the analysis
-to the platform's LLMOps capabilities and compare it empirically with
-open-source alternatives.
-% TODO (A): shorten to ~0.5 page after merging if the report exceeds the page budget.
+Two general lessons emerge. First, the dominant engineering challenge of
+an ML platform lies in data and features rather than in training, which
+justifies treating the feature store as a first-class architectural
+element~\cite{delbalso2018scaling}. Second, consistency and
+reproducibility are best enforced architecturally, through shared
+definitions, a single feature code path and immutable model
+versions~\cite{delbalso2017meet,sun2020gallery}, while selectively opened
+layers preserve flexibility for advanced users. Because Michelangelo is
+proprietary, this analysis relies on Uber's publications rather than
+direct inspection; future work could examine its LLMOps capabilities in
+more depth.
