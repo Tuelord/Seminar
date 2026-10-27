@@ -42,10 +42,10 @@ an API tier, web UI and workflow system~\cite{delbalso2017meet}. In 2018 Uber
 began ``factoring out Michelangelo's infrastructure into an explicit
 infrastructure layer''~\cite{delbalso2018scaling}. By 2024 the architecture is
 described as \textbf{three planes} (control, offline data and online data) built
-on a layer of \textbf{plug-and-play components}~\cite{wang2024predictive}. To
-these \textbf{we add two layers of our own}, built from components Uber names: an
-\emph{experience layer} on top and an \emph{infrastructure layer} at the bottom
-(\Cref{fig:layered-view,tab:layers}).
+on a layer of \textbf{plug-and-play components}~\cite{wang2024predictive}. Our
+five-layer view keeps these and Uber's 2018 infrastructure layer at the bottom,
+and \textbf{adds one layer of our own}, an \emph{experience layer} on top, built
+from components Uber names (\Cref{fig:layered-view,tab:layers}).
 
 \begin{figure}[ht]
   \centering
@@ -70,7 +70,7 @@ these \textbf{we add two layers of our own}, built from components Uber names: a
       & MA Studio (no-code UI), Canvas (ML monorepo, CI/CD)
       & Web UI, Git, Bazel, Docker~\cite{wang2024predictive} \\
     L4 Control plane & User-facing APIs; lifecycle of all ML entities
-      & API server, controllers, job federation, Gallery
+      & API server, controllers, job federation, Gallery (our placement)
       & Kubernetes API server, etcd, controller manager~\cite{wang2024predictive} \\
     L3a Offline data plane & Features, training, evaluation, batch inference
       & Palette batch pipelines, training pipelines, batch scoring
@@ -192,7 +192,8 @@ promises~\cite{richards2020}.
 \paragraph{Benefit 2. Engines are swapped inside a layer.} Triton replaced Neuropod,
 which is ``being deprecated'', in OPS, and Uber ``replaced Spark-based XGBoost and DL
 trainers with Ray-based trainers \ldots{} for better scalability and
-reliability''~\cite{wang2024predictive}. \emph{Our interpretation:} because teams
+reliability'', replacing a Horovod-on-Spark setup that had ``introduced many
+operational complexities''~\cite{wang2024predictive}. \emph{Our interpretation:} because teams
 describe \emph{what} to train and deploy, not \emph{which engine} runs it, these
 swaps stayed inside the lower layers. The same shared platform carried about 400
 active projects and 5,000+ production models in 2024~\cite{wang2024predictive}.
@@ -220,4 +221,6 @@ and engines from hundreds of product teams, at the classic costs of fragile
 shared layers, per-hop latency and rigidity. \emph{Our interpretation:} the move
 from the loosely layered 1.0 to the explicit three-plane 2.0 suggests that a
 large MLOps platform benefits from \emph{more} layering discipline over time,
-not less.
+not less; opening selected layers (Limitation~3) happens within that
+discipline, through explicit extension points rather than by bypassing the
+control plane.

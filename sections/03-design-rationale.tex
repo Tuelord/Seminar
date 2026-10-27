@@ -69,9 +69,9 @@ interpretation}; the decisions and components are taken from Uber's posts.
     \textbf{Requirement} & \textbf{Design decision} & \textbf{Component} & \textbf{Solves} \\
     \midrule
     Reuse features across teams
-      & One shared, curated feature store; offline features in HDFS, online
+      & One shared, curated feature store; offline features in Hive tables on HDFS, online
         features precomputed into Cassandra~\cite{delbalso2017meet}
-      & Feature store (Palette)~\cite{delbalso2017meet,uber2024palette}
+      & Feature store (later Palette)~\cite{delbalso2017meet,uber2024palette}
       & \ref{prob:features}, \ref{prob:tools} \\
     \addlinespace
     Same features in training and serving

@@ -56,7 +56,7 @@ store for inference~\cite{kreuzberger2023mlops}. It avoids duplicated
 feature engineering and inconsistent feature definitions across
 teams~\cite{orr2021managing}.
 \textbf{In Michelangelo}, the feature store (later \emph{Palette}) keeps
-offline features in Hive and online features in Cassandra, computed by
+offline features in Hive tables on HDFS and online features in Cassandra, computed by
 Spark batch jobs or Samza streaming jobs~\cite{li2017scaling}. Models
 refer to features only by canonical name, and the platform resolves each
 name to the correct offline or online source~\cite{delbalso2017meet}.
@@ -78,7 +78,8 @@ as immutable, so every update creates a new version; separates a
 parameters learned from one training set); and uses a rule engine to
 select a \emph{champion} model for serving or to trigger
 deployment~\cite{sun2020gallery}. Within Michelangelo it manages more
-than one million model instances~\cite{sun2020gallery}.
+than one million model instances~\cite{sun2020gallery}. In the rest of this
+report, \emph{model repository} means this registry role in Michelangelo.
 
 \subsection{Training/Serving Skew}
 \label{subsec:train-serve-skew}
@@ -156,15 +157,14 @@ generative AI phase extended the platform to large language models
     2.0 \newline (2019--2023) &
       DL as first-class citizen; Canvas; MA Studio; project tiering;
       three-plane architecture~\cite{wang2024predictive} &
-      \textbf{2020}: $>$1\,M model instances in Gallery~\cite{sun2020gallery};
-      $>$5{,}000 GPUs~\cite{wang2024predictive} in \textbf{2024} \\
+      \textbf{2020}: $>$1\,M model instances in Gallery~\cite{sun2020gallery} \\
     \addlinespace
     GenAI \newline (2023--) &
       Gen AI Gateway; LLM fine-tuning, evaluation and prompt
       management~\cite{wang2024predictive} &
       \textbf{2024}: $\approx$400 active projects; $>$20{,}000 training jobs/month;
       $>$5{,}000 production models; 10\,M predictions/s at
-      peak~\cite{wang2024predictive} \\
+      peak; $>$5{,}000 GPUs~\cite{wang2024predictive} \\
     \bottomrule
   \end{tabular}
 \end{table}

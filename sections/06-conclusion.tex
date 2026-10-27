@@ -38,7 +38,7 @@ centralised service; the two approaches are, however, converging.
 architecture whose core is a control plane over offline and online data
 planes~\cite{wang2024predictive}, with other styles, such as
 pipe-and-filter, plug-in engines and event-driven reconciliation, inside
-individual layers. Layering let Uber migrate infrastructure and replace
+individual layers. We argued that layering let Uber migrate infrastructure and replace
 engines, for example Spark-based trainers with Ray-based ones, without
 disturbing users~\cite{wang2024predictive}, at the cost of fragile shared
 layers, per-hop latency and rigidity.
