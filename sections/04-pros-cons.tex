@@ -97,7 +97,7 @@ A central platform means that one fault can affect many teams at once. In
 because schema validation ran only on the client side, prevented the
 online serving stack from loading metadata at start-up and broke major
 tier-1 use cases~\cite{uber2024palette}. Recovery took several hours,
-partly because a change to one feature group triggered updates to all
+partly because a change to one feature group triggered updates to all of its hundreds of
 feature groups~\cite{uber2024palette}. Centralisation also creates an
 organisational bottleneck: when requirements outpaced the platform
 roadmap, product teams were tempted to build their own systems, and Uber
@@ -112,7 +112,8 @@ Kafka brokers, Samza streaming engine, managed Cassandra clusters and
 in-house service provisioning and deployment tools~\cite{delbalso2017meet}.
 Even in 2024 its compute clusters were still being migrated from
 Peloton/Mesos to Kubernetes~\cite{wang2024predictive}.
-This coupling is what makes the platform fast inside Uber, but it means
+In our assessment, this coupling is what makes the platform fast inside
+Uber, but it means
 the design cannot be adopted as a product by other organisations, and
 each infrastructure migration becomes a platform-wide project.
 
@@ -149,7 +150,8 @@ directly explain the strengths and weaknesses above.
   Uber's scale; some commercial toolkits tried early on were
   abandoned~\cite{delbalso2018scaling}.
 
-  \item \textbf{Shared metadata needs server-side safeguards.} After the
+  \item \textbf{Shared metadata needs server-side safeguards} (our reading
+  of Uber's response). After the
   2021 Palette incident, Uber spent more than a year re-architecting the
   metadata store: it defined a formal object model, moved validation to
   the server, processed only incremental changes, and added a wrapper
@@ -251,7 +253,7 @@ infrastructure.
     ML frameworks &
       Multi-framework: Spark ML, XGBoost, TensorFlow, PyTorch,
       LLMs~\cite{wang2024predictive} &
-      Centred on TensorFlow~\cite{baylor2017tfx} &
+      Centred on TensorFlow~\cite{baylor2017tfx,tfxguide} &
       Any Python library~\cite{metaflowdocs} \\
     \addlinespace
     Feature management &
@@ -303,10 +305,10 @@ heavy dependence on one platform team. TFX and Metaflow answer with
 reusable building blocks that each team assembles and operates on
 infrastructure it already has, which makes them portable but leaves
 feature management and, in Metaflow's case, online serving to other
-tools. Interestingly, the designs are converging: Michelangelo~2.0
+tools. In our view, the designs are converging: Michelangelo~2.0
 moved towards plug-and-play components and code-first workflows that
 resemble a framework~\cite{wang2024predictive}, while TFX itself began as
-a centralised internal platform at Google~\cite{baylor2017tfx}. For an
+a centralised internal platform at Google~\cite{baylor2017tfx}. We conclude that for an
 organisation of Uber's size, with hundreds of projects and strict latency
 requirements, a central platform pays off; for smaller teams, a library
 such as Metaflow offers most of the workflow benefits without the cost of
