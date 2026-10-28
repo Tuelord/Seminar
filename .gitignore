@@ -15,3 +15,13 @@
 *.xdv
 # Compiled PDFs (download from GitHub Actions instead)
 *.pdf
+
+# ── Demo artefacts (generated at runtime) ──────────────────────────────────────
+demo/data/*.parquet
+demo/data/*.db
+demo/data/*.csv
+demo/data/feast_registry.db
+demo/data/feast_online.db
+__pycache__/
+*.pyc
+.feast/

@@ -1,0 +1,21 @@
+# Michelangelo Mini Demo — Dependencies
+# Install:  pip install -r requirements.txt
+
+# Feature store
+feast[sqlite]==0.40.1
+
+# ML training
+xgboost>=2.0.0
+scikit-learn>=1.3.0
+pandas>=2.0.0
+pyarrow>=14.0.0
+numpy>=1.24.0
+
+# Experiment tracking & model registry
+mlflow>=2.13.0
+boto3>=1.28.0            # MinIO / S3 support for MLflow artifacts
+
+# Online serving
+fastapi>=0.111.0
+uvicorn[standard]>=0.29.0
+pydantic>=2.0.0
