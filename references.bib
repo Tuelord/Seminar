@@ -2,8 +2,17 @@
 % All team members may ADD entries here.
 % Do NOT delete or rename existing keys (other members' sections depend on them).
 % Format: use BibTeX. One entry per reference.
+%
+% Key convention: <firstauthorlastname><year><keyword>, e.g. delbalso2017meet.
+% Before adding an Uber Engineering Blog post, CHECK whether it is already
+% listed under "Michelangelo: Uber Engineering Blog" below - the same three
+% posts were previously added three times under different keys.
 
-@article{sculley2015hidden,
+% =====================================================================
+%  General MLOps background
+% =====================================================================
+
+@inproceedings{sculley2015hidden,
   author    = {Sculley, D. and Holt, Gary and Golovin, Daniel and Davydov, Eugene
                and Phillips, Todd and Ebner, Dietmar and Chaudhary, Vinay and
                Young, Michael and Crespo, Jean-Francois and Dennison, Dan},
@@ -39,6 +48,251 @@
   year      = {2023},
   url       = {https://services.google.com/fh/files/misc/practitioners_guide_to_mlops_whitepaper.pdf},
   note      = {Accessed: 2026-10-24}
+}
+
+% =====================================================================
+%  Michelangelo: peer-reviewed sources
+% =====================================================================
+
+@inproceedings{li2017scaling,
+  author    = {Li, Li Erran and Chen, Eric and Hermann, Jeremy and Zhang, Pusheng
+               and Wang, Luming},
+  title     = {Scaling Machine Learning as a Service},
+  booktitle = {Proceedings of the 3rd International Conference on Predictive
+               Applications and APIs},
+  series    = {Proceedings of Machine Learning Research},
+  volume    = {67},
+  pages     = {14--29},
+  publisher = {PMLR},
+  year      = {2017},
+  url       = {https://proceedings.mlr.press/v67/li17a.html}
+}
+
+@inproceedings{sun2020gallery,
+  author    = {Sun, Chong and Azari, Nader and Turakhia, Chintan},
+  title     = {Gallery: A Machine Learning Model Management System at {Uber}},
+  booktitle = {Proceedings of the 23rd International Conference on Extending
+               Database Technology (EDBT)},
+  pages     = {474--485},
+  publisher = {OpenProceedings.org},
+  year      = {2020},
+  doi       = {10.5441/002/edbt.2020.59},
+  url       = {https://openproceedings.org/2020/conf/edbt/paper_217.pdf}
+}
+
+% =====================================================================
+%  Michelangelo: Uber Engineering Blog (primary grey literature)
+%  Author order and dates verified against the live posts on 2026-10-26.
+% =====================================================================
+
+@misc{delbalso2017meet,
+  author       = {Del Balso, Mike and Hermann, Jeremy},
+  title        = {Meet {Michelangelo}: {Uber}'s Machine Learning Platform},
+  howpublished = {Uber Engineering Blog},
+  year         = {2017},
+  month        = sep,
+  url          = {https://www.uber.com/en-AU/blog/michelangelo-machine-learning-platform/},
+  note         = {Accessed: 2026-10-26}
+}
+
+@misc{delbalso2018scaling,
+  author       = {Del Balso, Mike and Hermann, Jeremy},
+  title        = {Scaling Machine Learning at {Uber} with {Michelangelo}},
+  howpublished = {Uber Engineering Blog},
+  year         = {2018},
+  month        = nov,
+  url          = {https://www.uber.com/en-AU/blog/scaling-michelangelo/},
+  note         = {Accessed: 2026-10-26}
+}
+
+@misc{uber2018pyml,
+  author       = {Bedratiuk, Stepan and Cirit, Olcay and Stumpf, Kevin},
+  title        = {{Michelangelo PyML}: Introducing {Uber}'s Platform for Rapid
+                  {Python} {ML} Model Development},
+  howpublished = {Uber Engineering Blog},
+  year         = {2018},
+  month        = oct,
+  url          = {https://www.uber.com/en-AU/blog/michelangelo-pyml/},
+  note         = {Accessed: 2026-10-26}
+}
+
+@misc{uber2024palette,
+  author       = {Chothani, Paarth and Lai, Dehua and Marcott, Nicholas and
+                  Zhang, Chunhao and Feng, Xiyuan and Wu, Victoria},
+  title        = {{Palette} Meta Store Journey},
+  howpublished = {Uber Engineering Blog},
+  year         = {2024},
+  month        = jan,
+  url          = {https://www.uber.com/en-AU/blog/palette-meta-store-journey/},
+  note         = {Accessed: 2026-10-26}
+}
+
+@misc{wang2024predictive,
+  author       = {Wang, Kai and Wang, Joseph and Cai, Min and Chen, Eric},
+  title        = {From Predictive to Generative -- How {Michelangelo} Accelerates
+                  {Uber}'s {AI} Journey},
+  howpublished = {Uber Engineering Blog},
+  year         = {2024},
+  month        = may,
+  url          = {https://www.uber.com/en-AU/blog/from-predictive-to-generative-ai/},
+  note         = {Accessed: 2026-10-26}
+}
+
+% =====================================================================
+%  MLOps concepts
+% =====================================================================
+
+@article{kreuzberger2023mlops,
+  author    = {Kreuzberger, Dominik and K{\"u}hl, Niklas and Hirschl, Sebastian},
+  title     = {Machine Learning Operations ({MLOps}): Overview, Definition, and
+               Architecture},
+  journal   = {IEEE Access},
+  volume    = {11},
+  pages     = {31866--31879},
+  year      = {2023},
+  doi       = {10.1109/ACCESS.2023.3262138}
+}
+
+@inproceedings{amershi2019software,
+  author    = {Amershi, Saleema and Begel, Andrew and Bird, Christian and
+               DeLine, Robert and Gall, Harald and Kamar, Ece and Nagappan,
+               Nachiappan and Nushi, Besmira and Zimmermann, Thomas},
+  title     = {Software Engineering for Machine Learning: A Case Study},
+  booktitle = {Proceedings of the 41st IEEE/ACM International Conference on
+               Software Engineering: Software Engineering in Practice
+               (ICSE-SEIP)},
+  pages     = {291--300},
+  year      = {2019},
+  doi       = {10.1109/ICSE-SEIP.2019.00042}
+}
+
+@inproceedings{breck2019data,
+  author    = {Breck, Eric and Polyzotis, Neoklis and Roy, Sudip and Whang,
+               Steven Euijong and Zinkevich, Martin},
+  title     = {Data Validation for Machine Learning},
+  booktitle = {Proceedings of the 2nd SysML Conference},
+  address   = {Palo Alto, CA, USA},
+  year      = {2019},
+  url       = {https://mlsys.org/Conferences/2019/doc/2019/167.pdf}
+}
+
+@article{gama2014survey,
+  author    = {Gama, Jo{\~a}o and {\v{Z}}liobait{\.e}, Indr{\.e} and Bifet,
+               Albert and Pechenizkiy, Mykola and Bouchachia, Abdelhamid},
+  title     = {A Survey on Concept Drift Adaptation},
+  journal   = {ACM Computing Surveys},
+  volume    = {46},
+  number    = {4},
+  pages     = {44:1--44:37},
+  year      = {2014},
+  doi       = {10.1145/2523813}
+}
+
+@article{orr2021managing,
+  author    = {Orr, Laurel and Sanyal, Atindriyo and Ling, Xiao and Goel, Karan
+               and Leszczynski, Megan},
+  title     = {Managing {ML} Pipelines: Feature Stores and the Coming Wave of
+               Embedding Ecosystems},
+  journal   = {Proceedings of the VLDB Endowment},
+  volume    = {14},
+  number    = {12},
+  pages     = {3178--3181},
+  year      = {2021},
+  doi       = {10.14778/3476311.3476402}
+}
+
+@article{zaharia2018accelerating,
+  author    = {Zaharia, Matei and Chen, Andrew and Davidson, Aaron and Ghodsi,
+               Ali and Hong, Sue Ann and Konwinski, Andy and Murching, Siddharth
+               and Nykodym, Tomas and Ogilvie, Paul and Parkhe, Mani and Xie, Fen
+               and Zumar, Corey},
+  title     = {Accelerating the Machine Learning Lifecycle with {MLflow}},
+  journal   = {IEEE Data Engineering Bulletin},
+  volume    = {41},
+  number    = {4},
+  pages     = {39--45},
+  year      = {2018}
+}
+
+% Survey of ML artifact management systems; describes Michelangelo and Gallery.
+@misc{schlegel2022management,
+  author        = {Schlegel, Marius and Sattler, Kai-Uwe},
+  title         = {Management of Machine Learning Lifecycle Artifacts: A Survey},
+  year          = {2022},
+  eprint        = {2210.11831},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.DB},
+  url           = {https://arxiv.org/abs/2210.11831}
+}
+
+% =====================================================================
+%  Comparable platforms (used for the comparison in section 04)
+% =====================================================================
+
+@inproceedings{baylor2017tfx,
+  author    = {Baylor, Denis and Breck, Eric and Cheng, Heng-Tze and Fiedel, Noah
+               and Foo, Chuan Yu and Haque, Zakaria and Haykal, Salem and Ispir,
+               Mustafa and Jain, Vihan and Koc, Levent and Koo, Chiu Yuen and Lew,
+               Lukasz and Mewald, Clemens and Modi, Akshay Naresh and Polyzotis,
+               Neoklis and Ramesh, Sukriti and Roy, Sudip and Whang, Steven
+               Euijong and Wicke, Martin and Wilkiewicz, Jarek and Zhang, Xin and
+               Zinkevich, Martin},
+  title     = {{TFX}: A {TensorFlow}-Based Production-Scale Machine Learning
+               Platform},
+  booktitle = {Proceedings of the 23rd ACM SIGKDD International Conference on
+               Knowledge Discovery and Data Mining (KDD)},
+  pages     = {1387--1395},
+  year      = {2017},
+  doi       = {10.1145/3097983.3098021}
+}
+
+@misc{tfxguide,
+  author       = {{TensorFlow Team}},
+  title        = {The {TFX} User Guide},
+  howpublished = {TensorFlow documentation},
+  year         = {2026},
+  url          = {https://www.tensorflow.org/tfx/guide},
+  note         = {Accessed: 2026-10-21}
+}
+
+@misc{metaflowdocs,
+  author       = {{Metaflow Team}},
+  title        = {What is {Metaflow}},
+  howpublished = {Metaflow documentation},
+  year         = {2026},
+  url          = {https://docs.metaflow.org/introduction/what-is-metaflow},
+  note         = {Accessed: 2026-10-21}
+}
+
+% =====================================================================
+%  Software architecture textbooks (used for the layered analysis, section 05)
+% =====================================================================
+
+@book{bass2021,
+  author    = {Bass, Len and Clements, Paul and Kazman, Rick},
+  title     = {Software Architecture in Practice},
+  edition   = {4th},
+  publisher = {Addison-Wesley},
+  year      = {2021},
+  isbn      = {978-0136886099}
+}
+
+@book{buschmann1996,
+  author    = {Buschmann, Frank and Meunier, Regine and Rohnert, Hans and
+               Sommerlad, Peter and Stal, Michael},
+  title     = {Pattern-Oriented Software Architecture, Volume 1: A System of
+               Patterns},
+  publisher = {Wiley},
+  year      = {1996},
+  isbn      = {978-0471958697}
+}
+
+@book{richards2020,
+  author    = {Richards, Mark and Ford, Neal},
+  title     = {Fundamentals of Software Architecture: An Engineering Approach},
+  publisher = {O'Reilly Media},
+  year      = {2020},
+  isbn      = {978-1492043454}
 }
 
 % ADD YOUR REFERENCES BELOW THIS LINE
