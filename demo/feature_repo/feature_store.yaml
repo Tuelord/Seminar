@@ -1,0 +1,13 @@
+# feature_repo/feature_store.yaml
+# Feast configuration for the Michelangelo Mini Demo.
+# Uses SQLite as the online store (no Redis needed).
+
+project: taxi_demo
+provider: local
+registry: ../data/feast_registry.db
+online_store:
+  type: sqlite
+  path: ../data/feast_online.db
+offline_store:
+  type: file
+entity_key_serialization_version: 3
