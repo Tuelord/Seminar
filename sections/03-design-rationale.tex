@@ -69,9 +69,9 @@ interpretation}; the decisions and components are taken from Uber's posts.
     \textbf{Requirement} & \textbf{Design decision} & \textbf{Component} & \textbf{Solves} \\
     \midrule
     Reuse features across teams
-      & One shared, curated feature store; offline features in HDFS, online
+      & One shared, curated feature store; offline features in Hive tables on HDFS, online
         features precomputed into Cassandra~\cite{delbalso2017meet}
-      & Feature store (Palette)~\cite{delbalso2017meet,uber2024palette}
+      & Feature store (later Palette)~\cite{delbalso2017meet,uber2024palette}
       & \ref{prob:features}, \ref{prob:tools} \\
     \addlinespace
     Same features in training and serving
@@ -81,16 +81,18 @@ interpretation}; the decisions and components are taken from Uber's posts.
       & \ref{prob:pipelines}, \ref{prob:features} \\
     \addlinespace
     Train beyond one machine
-      & Distributed training on Spark, later Horovod for deep learning and Ray
-        trainers~\cite{delbalso2017meet,delbalso2018scaling,wang2024predictive}
-      & Training jobs on Spark, Horovod, Ray~\cite{wang2024predictive}
+      & Distributed training on Spark~\cite{delbalso2017meet}, later Horovod for
+        deep learning~\cite{delbalso2018scaling} and Ray
+        trainers~\cite{wang2024predictive}
+      & Training jobs on Spark, Horovod,
+        Ray~\cite{delbalso2017meet,delbalso2018scaling,wang2024predictive}
       & \ref{prob:desktop} \\
     \addlinespace
     Store and compare every experiment
       & Store each trained model as a versioned object with its configuration,
         learned parameters and evaluation report; compare models in the
         UI~\cite{delbalso2017meet}
-      & Model repository, Gallery in 2.0~\cite{delbalso2017meet,wang2024predictive}
+      & Model repository~\cite{delbalso2017meet}, later Gallery~\cite{sun2020gallery}
       & \ref{prob:experiments}, \ref{prob:pipelines} \\
     \addlinespace
     One-click, safe deployment
@@ -101,7 +103,7 @@ interpretation}; the decisions and components are taken from Uber's posts.
     \addlinespace
     No custom serving per project
       & One shared prediction service that other services call over RPC,
-        instead of a container per project~\cite{delbalso2017meet,wang2024predictive}
+        instead of a container per project~\cite{delbalso2017meet}
       & Online Prediction Service~\cite{delbalso2017meet,wang2024predictive}
       & \ref{prob:deploy}, \ref{prob:tools} \\
     \addlinespace
@@ -167,8 +169,8 @@ where Uber publishes one, a number.
     \textbf{Attribute} & \textbf{Mechanism} & \textbf{Published figure} \\
     \midrule
     Scalability
-      & Distributed training on Spark, Horovod and
-        Ray~\cite{delbalso2017meet,delbalso2018scaling,wang2024predictive}; for offline prediction, ``add
+      & Distributed training on Spark~\cite{delbalso2017meet},
+        Horovod~\cite{delbalso2018scaling} and Ray~\cite{wang2024predictive}; for offline prediction, ``add
         more Spark executors and let Spark manage the
         parallelism''~\cite{delbalso2017meet}
       & Training on ``billions of samples''; top models served more than

@@ -27,7 +27,7 @@ the same decisions. Centralisation delivered feature reuse, a
 standardised workflow, high scale and project tiering, but also made the
 platform heavyweight for prototyping, tightly coupled to Uber's
 infrastructure, and exposed to platform-wide failures such as the 2021
-Palette metadata incident~\cite{delbalso2018scaling,uber2024palette}.
+Palette metadata incident~\cite{uber2024palette}.
 Uber's response, an easy-to-use option alongside a high-scale one,
 illustrates the central trade-off between standardisation and iteration
 speed~\cite{delbalso2018scaling}. Compared with TFX and Metaflow, which
@@ -38,7 +38,7 @@ centralised service; the two approaches are, however, converging.
 architecture whose core is a control plane over offline and online data
 planes~\cite{wang2024predictive}, with other styles, such as
 pipe-and-filter, plug-in engines and event-driven reconciliation, inside
-individual layers. Layering let Uber migrate infrastructure and replace
+individual layers. We argued that layering let Uber migrate infrastructure and replace
 engines, for example Spark-based trainers with Ray-based ones, without
 disturbing users~\cite{wang2024predictive}, at the cost of fragile shared
 layers, per-hop latency and rigidity.
