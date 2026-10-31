@@ -1,0 +1,53 @@
+% =====================================================================
+% sections/07-ai-declaration.tex  --  Member A
+% Appendix required by the course: every use of AI tools must be listed.
+% Each member adds a row for any AI use in their own part.
+% =====================================================================
+
+\section{AI Tool Usage Declaration}
+\label{sec:ai-declaration}
+
+The group used AI tools to assist with parts of this work. All content was
+checked against the cited sources, and every member is responsible for and can
+explain the content of their own section. \Cref{tab:ai-declaration} lists each
+use.
+
+\begin{table}[ht]
+  \centering
+  \small
+  \caption{AI tools used, their purpose, main prompts and assisted outputs.}
+  \label{tab:ai-declaration}
+  \begin{tabularx}{\linewidth}{@{}L{2.2cm}*{3}{>{\raggedright\arraybackslash}X}@{}}
+    \toprule
+    \textbf{Tool} & \textbf{Purpose} & \textbf{Main prompts} & \textbf{Output supported by AI} \\
+    \midrule
+    Google Gemini
+      & Explore candidate MLOps topics before choosing the case study
+      & Asked for MLOps platforms and topics suitable for a software
+        architecture seminar, with pros and cons of each
+      & A shortlist of candidate topics, from which the group chose Uber's
+        Michelangelo \\
+    \addlinespace
+    Claude
+      & Explain architecture concepts in depth and compare alternatives
+      & Asked to explain concepts used in this report (e.g.\ layered
+        architecture, control and data planes, architecture styles) and to
+        compare Michelangelo with other designs and platforms
+      & Explanations the authors used to understand the concepts; all claims in
+        the report were checked against the cited sources \\
+    \addlinespace
+    Claude
+      & Review the draft against the group's Definition of Done
+      & ``Review each member's section against the DoD and report back''
+      & A list of missing items, unsupported claims and citation problems per section \\
+    \addlinespace
+    Claude
+      & Verify that cited sources support the claims they are attached to
+      & Asked to check each citation in the report against the cited source
+        and flag claims that the source does not support
+      & A list of citations to correct or replace; the authors made the fixes
+        and re-checked the sources \\
+    % Add a row here for any other AI use (tool, purpose, prompts, output).
+    \bottomrule
+  \end{tabularx}
+\end{table}
