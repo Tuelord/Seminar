@@ -44,8 +44,7 @@ SoftwareArchitectureReport/
 ├── demo/                           ← Demo MLOps stack (Member G phụ trách)
 │   ├── README.md
 │   ├── docker-compose.yml
-│   ├── train_demo.py
-│   └── serve_demo.py
+│   └── *.py
 └── .github/
     └── workflows/
         └── build-pdf.yml           ← GitHub Actions — tự động build PDF
@@ -279,7 +278,7 @@ Theo nghiên cứu của \cite{authorkey2024}, ...
 
 Xem [`demo/README.md`](demo/README.md) để biết hướng dẫn chi tiết cách chạy demo stack MLOps.
 
-**Yêu cầu:** Docker Desktop, Python 3.10+
+**Yêu cầu:** Docker Desktop, Python 3.10–3.13
 
 ```bash
 cd demo
@@ -287,13 +286,11 @@ cd demo
 # Khởi động Docker containers
 docker compose up -d
 
-# Chạy demo training
-python train_demo.py
-# → Giao diện MLflow UI: http://localhost:5000
-
-# Khởi động API serving
-python serve_demo.py
-# → Giao diện API Swagger Docs: http://localhost:8000/docs
+# Cài thư viện
+pip install -r requirements.txt
+# Chạy toàn bộ demo (feature → train → serve → monitor)
+python run_demo.py
+# → Giao diện MLflow UI: http://localhost:5001
 ```
 
 ---

@@ -2,62 +2,27 @@
 # Michelangelo Mini Demo — Infrastructure Stack
 #
 # Services:
-#   - MLflow Tracking Server  (http://localhost:5000)
-#   - MinIO S3-compatible store (http://localhost:9000, console :9001)
+#   - MLflow Tracking Server  (http://localhost:5001)
+#     Model artifacts are stored in a local volume and served by MLflow itself
+#     (MinIO images are no longer published publicly).
 #
 # Usage:
 #   docker compose up -d
 
-version: "3.9"
-
 services:
-  minio:
-    image: minio/minio:latest
-    command: server /data --console-address ":9001"
-    environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
-    ports:
-      - "9000:9000"    # S3 API
-      - "9001:9001"    # Web console
-    volumes:
-      - minio_data:/data
-    healthcheck:
-      test: ["CMD", "mc", "ready", "local"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  # Create the default bucket on first start
-  minio-init:
-    image: minio/mc:latest
-    depends_on:
-      minio:
-        condition: service_healthy
-    entrypoint: >
-      /bin/sh -c "
-        mc alias set local http://minio:9000 minioadmin minioadmin &&
-        mc mb --ignore-existing local/mlflow-artifacts &&
-        echo 'Bucket mlflow-artifacts ready.'
-      "
-
   mlflow:
-    image: ghcr.io/mlflow/mlflow:v2.13.0
+    image: ghcr.io/mlflow/mlflow:v3.17.2  # keep in sync with requirements.txt
     command: >
       mlflow server
-        --backend-store-uri sqlite:///mlflow.db
-        --default-artifact-root s3://mlflow-artifacts
+        --backend-store-uri sqlite:////mlflow/mlflow.db
+        --artifacts-destination /mlflow/artifacts
+        --serve-artifacts
         --host 0.0.0.0
         --port 5000
-    environment:
-      MLFLOW_S3_ENDPOINT_URL: http://minio:9000
-      AWS_ACCESS_KEY_ID: minioadmin
-      AWS_SECRET_ACCESS_KEY: minioadmin
     ports:
-      - "5000:5000"
-    depends_on:
-      minio-init:
-        condition: service_completed_successfully
+      - "5001:5000"    # host 5000 is taken by AirPlay on macOS
+    volumes:
+      - mlflow_data:/mlflow
 
 volumes:
-  minio_data:
+  mlflow_data:
