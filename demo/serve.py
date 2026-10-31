@@ -47,15 +47,10 @@ DATA_DIR = os.path.join(DEMO_DIR, "data")
 FEATURE_REPO_DIR = os.path.join(DEMO_DIR, "feature_repo")
 LOG_PATH = os.path.join(DATA_DIR, "prediction_log.csv")
 
-MLFLOW_TRACKING_URI = os.getenv("MLFLOW_TRACKING_URI", "http://localhost:5000")
+MLFLOW_TRACKING_URI = os.getenv("MLFLOW_TRACKING_URI", "http://localhost:5001")
 MODEL_NAME = os.getenv("MODEL_NAME", "taxi-fare-model")
 MODEL_ALIAS = os.getenv("MODEL_ALIAS", "champion")
 WATCH_INTERVAL = int(os.getenv("MODEL_WATCH_INTERVAL", "15"))  # seconds
-
-# For MinIO / S3
-os.environ.setdefault("MLFLOW_S3_ENDPOINT_URL", "http://localhost:9000")
-os.environ.setdefault("AWS_ACCESS_KEY_ID", "minioadmin")
-os.environ.setdefault("AWS_SECRET_ACCESS_KEY", "minioadmin")
 
 mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
 

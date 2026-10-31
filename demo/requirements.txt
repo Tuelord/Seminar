@@ -12,8 +12,7 @@ pyarrow>=14.0.0
 numpy>=1.24.0
 
 # Experiment tracking & model registry
-mlflow>=2.13.0
-boto3>=1.28.0            # MinIO / S3 support for MLflow artifacts
+mlflow==3.17.2           # must match the server image in docker-compose.yml
 
 # Online serving
 fastapi>=0.111.0

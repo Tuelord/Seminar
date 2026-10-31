@@ -34,7 +34,7 @@ DEMO_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(DEMO_DIR, "data")
 LABELS_PATH = os.path.join(DATA_DIR, "taxi_labels.parquet")
 
-MLFLOW_TRACKING_URI = os.getenv("MLFLOW_TRACKING_URI", "http://localhost:5000")
+MLFLOW_TRACKING_URI = os.getenv("MLFLOW_TRACKING_URI", "http://localhost:5001")
 EXPERIMENT_NAME = "taxi-fare-demo"
 MODEL_NAME = "taxi-fare-model"
 

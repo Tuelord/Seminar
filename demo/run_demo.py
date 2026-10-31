@@ -14,7 +14,7 @@ Runs all four layers in sequence and demonstrates the alias-swap feature:
   Step 7: Monitor   — monitor.py (compare predictions vs actuals)
 
 Prerequisites:
-    docker compose up -d   # MLflow + MinIO
+    docker compose up -d   # MLflow
     pip install -r requirements.txt
 
 Usage:

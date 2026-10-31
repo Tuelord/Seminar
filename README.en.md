@@ -44,8 +44,7 @@ SoftwareArchitectureReport/
 ├── demo/                           ← MLOps demo stack (Member G manages)
 │   ├── README.md
 │   ├── docker-compose.yml
-│   ├── train_demo.py
-│   └── serve_demo.py
+│   └── *.py
 └── .github/
     └── workflows/
         └── build-pdf.yml           ← GitHub Actions — auto-build PDF
@@ -279,7 +278,7 @@ According to \cite{authorkey2024}, ...
 
 See [`demo/README.md`](demo/README.md) for detailed instructions on running the demo stack.
 
-**Requirements:** Docker Desktop, Python 3.10+
+**Requirements:** Docker Desktop, Python 3.10–3.13
 
 ```bash
 cd demo
@@ -287,13 +286,11 @@ cd demo
 # Start the stack
 docker compose up -d
 
-# Run demo training
-python train_demo.py
-# → MLflow UI at: http://localhost:5000
-
-# Start serving API
-python serve_demo.py
-# → API Swagger Docs at: http://localhost:8000/docs
+# Install dependencies
+pip install -r requirements.txt
+# Run the full demo (features → train → serve → monitor)
+python run_demo.py
+# → MLflow UI at: http://localhost:5001
 ```
 
 ---
