@@ -124,7 +124,7 @@ def main() -> None:
     print()
     print("STEP 2 ▸ Registering feature definitions (feast apply) …")
     subprocess.run(
-        [sys.executable, "-m", "feast", "apply"],
+        [sys.executable, "-m", "feast.cli", "apply"],
         cwd=FEATURE_REPO_DIR,
         check=True,
     )
@@ -137,7 +137,7 @@ def main() -> None:
     end_date = "2024-12-31T23:59:59"
     subprocess.run(
         [
-            sys.executable, "-m", "feast",
+            sys.executable, "-m", "feast.cli",
             "materialize", start_date, end_date,
         ],
         cwd=FEATURE_REPO_DIR,

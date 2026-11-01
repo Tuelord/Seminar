@@ -34,7 +34,7 @@
 
 | File | Layer | Purpose |
 |---|---|---|
-| `docker-compose.yml` | Infra | MLflow Tracking Server + MinIO (S3) |
+| `docker-compose.yml` | Infra | MLflow Tracking Server (artifacts in a local volume) |
 | `generate_features.py` | Offline | Create synthetic taxi data → Parquet → Feast materialize |
 | `feature_repo/` | Offline | Feast feature store definitions + config |
 | `train.py` | Training | XGBoost → MLflow → register model → set alias `champion` |
@@ -46,7 +46,7 @@
 ## Prerequisites
 
 - **Docker** (with Docker Compose)
-- **Python 3.10+**
+- **Python 3.10–3.13** (tested with 3.12; Python 3.14 fails on `import feast`)
 
 ## Quick Start
 
@@ -127,7 +127,7 @@ transparently.
 
 ## MLflow UI
 
-Open [http://localhost:5000](http://localhost:5000) to view experiments,
+Open [http://localhost:5001](http://localhost:5001) to view experiments,
 runs, metrics, and the model registry.
 
 ## Mapping to Michelangelo Architecture
@@ -142,5 +142,3 @@ runs, metrics, and the model registry.
 | Model deployment | Alias swap (`champion` → new version) |
 | Monitoring | `monitor.py` (MAE comparison) |
 
-> **Note**: The old `train_demo.py` and `serve_demo.py` files are kept
-> for reference but are not part of this Michelangelo demo.
